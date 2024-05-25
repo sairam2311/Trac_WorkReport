@@ -16,10 +16,15 @@
                 <label>Project Number</label>
                 <input asp-for="Work" type="text" class="form-control" />
             </div>
-            <div class="mb-3">
+         @*   <div class="mb-3">
                 <label>Project Name</label>
                 <input asp-for="Work" type="text" class="form-control" />
-            </div>
+            </div>*@
+
+        <div class="mb-3">
+            <label for="WorkDis" class="form-label mt-4">Work Description</label>
+            <textarea asp-for="Work" class="form-control" id="WorkDis" rows="5"></textarea>
+        </div>
             <!-- Date Picker -->
             <div class="mb-3">
                 <label>Date</label>
