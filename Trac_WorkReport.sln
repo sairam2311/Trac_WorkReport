@@ -5,11 +5,16 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Trac_WorkReport", "Trac_WorkReport\Trac_WorkReport.csproj", "{481C1BA3-86E6-424D-A6EA-ACA86E20D6EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkRport.DataAccess", "WorkRport.DataAccess\WorkRport.DataAccess.csproj", "{456511E0-C1BD-4EB0-A91E-5009184835C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkRport.DataAccess", "WorkRport.DataAccess\WorkRport.DataAccess.csproj", "{456511E0-C1BD-4EB0-A91E-5009184835C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkReport.Models", "WorkReport.Models\WorkReport.Models.csproj", "{BB158BAC-5D2A-40E2-B4AD-B9BEFEBF9BCE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkReport.Models", "WorkReport.Models\WorkReport.Models.csproj", "{BB158BAC-5D2A-40E2-B4AD-B9BEFEBF9BCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkReport.Utility", "WorkReport.Utility\WorkReport.Utility.csproj", "{06220C19-0C62-4459-B000-A5C3375D9FD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkReport.Utility", "WorkReport.Utility\WorkReport.Utility.csproj", "{06220C19-0C62-4459-B000-A5C3375D9FD9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB09D82A-D479-495A-A875-47A80427933A}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
