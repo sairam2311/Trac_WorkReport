@@ -1,0 +1,64 @@
+﻿@page
+@model Trac_WorkReport.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+<div class="container">
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-secondary bg-gradient ml-0 py-2">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="py-2 text-white">Add New Employee</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row pt-3">
+                <div class="col-md-12">
+                    <form id="registerForm" class="row" asp-page-handler="Register" method="post">
+                        <input type="hidden" asp-for="ReturnUrl" value="@Model.ReturnUrl" />
+                        <div class="mb-1 col-md-6">
+                            <label asp-for="RegisterViewModel.Input.EmployeeID" class="form-label ms-2 text-muted"></label>
+                            <input asp-for="RegisterViewModel.Input.EmployeeID" type="text" class="form-control" id="EmployeeID" aria-describedby="EmpIDHelp" placeholder="Employee ID">
+                            <span asp-validation-for="RegisterViewModel.Input.EmployeeID" class="text-danger"></span>
+                        </div>
+                        <div class="mb-1 col-md-6">
+                            <label asp-for="RegisterViewModel.Input.EmployeeName" class="form-label ms-2 text-muted"></label>
+                            <input asp-for="RegisterViewModel.Input.EmployeeName" type="text" class="form-control" id="EmployeeName" aria-describedby="EmpIDHelp" placeholder="Employee Name">
+                            <span asp-validation-for="RegisterViewModel.Input.EmployeeName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-1 col-md-6">
+                            <label asp-for="RegisterViewModel.Input.role" class="form-label ms-2 text-muted"></label>
+                            <select asp-for="RegisterViewModel.Input.role" class="form-control" asp-items="@Model.RegisterViewModel.Input.RoleList">
+                                <option selected disabled>Select Role</option>
+                            </select>
+                            <span asp-validation-for="RegisterViewModel.Input.role" class="text-danger"></span>
+                        </div>
+                      
+                        <div class="mb-1 col-md-6">
+                            <label asp-for="RegisterViewModel.Input.Email" class="form-label ms-2 text-muted"></label>
+                            <input asp-for="RegisterViewModel.Input.Email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                            <span asp-validation-for="RegisterViewModel.Input.Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-1 col-md-6">
+                            <label asp-for="RegisterViewModel.Input.Password" class="form-label ms-2 text-muted"></label>
+                            <input asp-for="RegisterViewModel.Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+                            <span asp-validation-for="RegisterViewModel.Input.Password" class="text-danger"></span>
+                        </div>
+                        <div class="mb-1 col-md-6">
+                            <label asp-for="RegisterViewModel.Input.ConfirmPassword" class="form-label ms-2 text-muted"></label>
+                            <input asp-for="RegisterViewModel.Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+                            <span asp-validation-for="RegisterViewModel.Input.ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        <div class="mt-3 col-12">
+                            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

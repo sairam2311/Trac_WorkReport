@@ -1,0 +1,122 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@using Trac_WorkReport.Controllers
+@model UserIndexViewModel
+
+@{
+    ViewData["Title"] = "User List";
+}
+
+@*<h1>User List</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@user.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@user.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>*@
+
+<div class="container">
+
+
+    <div class="row pt-4" style="display:none">
+        <div class="col-6">
+            <div class="col-6">
+        <label asp-for="CurrentUser.Email" class="col-form-label">Email</label>
+       </div>
+            <div class="col-6">
+            <input type="text" readonly="" class="form-control-plaintext" id="staticEmail" asp-for="CurrentUser.Email">
+        </div>
+        </div>
+        <div class="col-6">
+            <label asp-for="CurrentUser.Email" class="col-form-label">Email</label>
+            <div >
+                <input type="text" readonly="" class="form-control-plaintext" id="staticEmail" asp-for="CurrentUser.Email">
+            </div>
+        </div>
+         <div class="col-6">
+        <label asp-for="CurrentUser.Email" class="col-form-label">Email</label>
+        <div>
+            <input type="text" readonly="" class="form-control-plaintext" id="staticEmail" asp-for="CurrentUser.Email">
+        </div>
+        </div>
+        <div class="col-6">
+            <label asp-for="CurrentUser.Email" class="col-sm-2 col-form-label">Email</label>
+            <div >
+                <input type="text" readonly="" class="form-control-plaintext" id="staticEmail" asp-for="CurrentUser.Email">
+            </div>
+        </div>
+        <div class="col-6">
+            <label asp-for="CurrentUser.Email" class="col-sm-2 col-form-label">Email</label>
+            <div >
+                <input type="text" readonly="" class="form-control-plaintext" id="staticEmail" asp-for="CurrentUser.Email">
+            </div>
+        </div>
+    </div>
+        
+
+    <div class="row pt-4">
+        <!-- Title and Add Button Section -->
+        <div class="col-6">
+            <h2 class="text-primary">Users</h2>
+        </div>
+      @*  <div class="col-6 text-end">
+            <a asp-controller="user" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Designation
+            </a>
+        </div>*@
+
+    </div>
+
+    <!-- Designations Table -->
+    <table id="designationsTable" class="table table-bordered table-striped dataTable">
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>User Name</th>
+                <th>Designation</th>
+                
+                <th>Email</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var obj in Model.AllUsersWithRoles.OrderBy(u => u.EmployeeName))
+            {
+                <tr>
+                    <td>@obj.employeeID</td>
+                    <td>@obj.EmployeeName</td>
+                    <td>@string.Join(", ",obj.Roles.Select(r=>r.RoleName))</td>
+                    <td>@obj.Email</td>
+                    <td>
+                        <div class="w-50 btn-group" role="group">
+                            <a asp-controller="Designation" asp-action="Edit" asp-route-id="@obj.Id" class="mx-1">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a asp-controller="Designation" asp-action="Delete" asp-route-id="@obj.Id" class="mx-1">
+                                <i class="bi bi-archive-fill"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

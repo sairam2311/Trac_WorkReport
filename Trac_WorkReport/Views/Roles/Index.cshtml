@@ -1,0 +1,57 @@
+﻿@*@using Microsoft.AspNetCore.Identity*@
+@using WorkReport.Models;
+@model IEnumerable<ApplicationRole>
+
+<div class="container">
+    <div class="row pt-4">
+        <!-- Title and Add Button Section -->
+        <div class="col-6">
+            <h2 class="text-primary">Designation</h2>
+        </div>
+        <div class="col-6 text-end">
+            <a asp-controller="Roles" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Designation
+            </a>
+        </div>
+    </div>
+
+    <!-- Designations Table -->
+    <table id="designationsTable" class="table table-bordered table-striped dataTable">
+        <thead>
+            <tr>
+                <th>Designation</th>
+                <th>Designation Full Form</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                @foreach (var obj in Model.OrderBy(u => u.Name))
+                {
+                    <tr>
+                        <td>@obj.NormalizedName</td>
+                        <td>@obj.RoleName</td>
+                        
+                        <td>
+                            <div class="w-50 btn-group" role="group">
+                                <a asp-controller="Roles" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-secondary mx-1">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a asp-controller="Roles" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger mx-1">
+                                    <i class="bi bi-archive-fill"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">No roles found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

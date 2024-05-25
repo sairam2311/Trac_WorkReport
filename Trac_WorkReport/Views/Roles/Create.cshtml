@@ -1,0 +1,44 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@using Microsoft.AspNetCore.Identity
+@using WorkReport.Models;
+@model ApplicationRole
+
+<form method="post">
+    <div class="container">
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="card-title mb-0">Add Designation</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Designation Abbreviation</label>
+                            <input asp-for="Name" id="Name" type="text" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="RoleName" class="form-label">Designation Full Name</label>
+                            <input asp-for="RoleName" id="RoleName" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100">Submit</button>
+                            </div>
+                            <div class="col-md-6">
+                                <a asp-controller="Roles" asp-action="Index" class="btn btn-outline-secondary w-100">Back to List</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

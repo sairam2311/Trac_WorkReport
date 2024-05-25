@@ -1,0 +1,127 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@using Trac_WorkReport.Controllers
+@model UserIndexViewModelTS
+
+@{
+    ViewData["Title"] = "User Index";
+}
+
+<div class="border p-1 mt-1">
+<div class="row gutters-sm">
+    <div class="col-md-12">
+        <div class="card m-1">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Full Name</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center text-primary">
+                        @Model.CurrentUser.EmployeeName
+                    </div>
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Employee ID</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center text-light">
+                        @Model.CurrentUser.EmployeeID
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Reporting Officer</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center text-success">
+                        @if (string.IsNullOrEmpty(Model.CurrentUser.ReportingOfficerName))
+                        {
+                            <span class="text-danger">No Reporting Officer Assigned</span>
+                        }
+                        else
+                        {
+                            <span class="text-success">@Model.CurrentUser.ReportingOfficerName</span>
+                        }
+                    </div>
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Designation</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center text-info">
+                        @foreach (var role in Model.CurrentUser.Roles)
+                        {
+                            <span>@role.RoleName</span>
+                        }
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <h6 class="mb-0">Reviewing Officer</h6>
+                    </div>
+                    <div class="col-sm-4 text-danger">
+                        @Model.CurrentUser.ReviewingofficerName
+                    </div>
+                        <div class="col-6 text-end">
+                            <a asp-controller="TS" asp-action="Create" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Add Self Report
+                            </a>
+
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+@*<div class="row gutters-sm">
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Full Name</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center  text-primary">
+                        CurrentUser.Email
+                    </div>
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Email</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center text-light">
+                        fip@jukmuh.al
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Phone</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center text-success">
+                        (239) 816-9029
+                    </div>
+                    <div class="col-sm-2">
+                        <h6 class="mb-0 d-flex justify-content-between align-items-center">Mobile</h6>
+                    </div>
+                    <div class="col-sm-4 d-flex justify-content-between align-items-center text-info">
+                        (320) 380-4539
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <h6 class="mb-0">Address</h6>
+                    </div>
+                    <div class="col-sm-10 text-danger">
+                        Bay Area, San Francisco, CA
+                    </div>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+*@

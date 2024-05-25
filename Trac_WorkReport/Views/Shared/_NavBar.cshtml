@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using WorkReport.Models;
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="/">MyApp</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-page="/Index">Home</a>
+            </li>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-page="/Account/Manage/Index">Profile</a>
+                </li>
+                @if (await UserManager.IsInRoleAsync(UserManager.GetUserAsync(User).Result, "Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-page="/Index">Admin Dashboard</a>
+                    </li>
+                }
+                @if (await UserManager.IsInRoleAsync(UserManager.GetUserAsync(User).Result, "Manager"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Manager" asp-page="/Index">Manager Dashboard</a>
+                    </li>
+                }
+                <li class="nav-item">
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" method="post">
+                        <button type="submit" class="nav-link btn btn-link">Logout</button>
+                    </form>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                </li>
+            }
+        </ul>
+    </div>
+</nav>

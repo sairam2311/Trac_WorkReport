@@ -1,0 +1,125 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@*@using WorkReport.Models.Models;*@
+@using Trac_WorkReport.Controllers;
+@using static Trac_WorkReport.Controllers.UserMappingController;
+@model List<EmployeeMappingViewModel>
+
+
+<h1>Employee Mappings</h1>
+
+<a asp-action="Add" class="btn btn-primary">Add New Mapping</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Reviewing Officer</th>
+            <th>Reporting Officer</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EmployeeName</td>
+                <td>@item.ReviewingOfficerName</td>
+                <td>@item.ReportingOfficerName</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+@*<h1>Employee Mappings</h1>
+
+<a asp-action="Edit" class="btn btn-primary">Add New Mapping</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Reviewing Officer</th>
+            <th>Reporting Officer</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EmployeeName</td>
+                <td>@item.ReviewingOfficerName</td>
+                <td>@item.ReportingOfficerName</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>*@
+
+
+@*<div class="row pt-4">
+<div class="col-4">
+    <label for="exampleSelect2" class="form-label mt-4">Example multiple select</label>
+    <select multiple="" class="form-select" id="exampleSelect2">
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+    </select>
+</div>
+    <div class="col-4">
+        <label for="exampleSelect2" class="form-label mt-4">Example multiple select</label>
+        <select multiple="" class="form-select" id="exampleSelect2">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+        </select>
+    </div>
+    <div class="col-4">
+        <label for="exampleSelect2" class="form-label mt-4">Example multiple select</label>
+        <select multiple="" class="form-select" id="exampleSelect2">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+        </select>
+    </div>
+</div>*@
+
+
+@*<form method="post" action="@Url.Action("UpdateUsers", "YourController")">
+    <div class="row pt-4">
+        <div class="col-4">
+            <label class="form-label mt-4">Select Users</label>
+            @foreach (var user in Model)
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="userCheckbox_@user.Id" name="selectedUsers" value="@user.Id">
+                    <label class="form-check-label" for="userCheckbox_@user.Id">
+                        @user.Name
+                    </label>
+                </div>
+            }
+        </div>
+        <!-- Repeat the above code for other columns if needed -->
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>*@

@@ -1,0 +1,51 @@
+﻿@using WorkReport.Models.Models;
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model TimeSheet
+
+
+    <form method="post">
+        <div class="border p-3 mt-4">
+            <div class="row pb-2">
+                <h2 class="text-primary">Add Project</h2>
+            </div>
+            <div class="mb-3">
+                <label>Project Number</label>
+                <input asp-for="Work" type="text" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label>Project Name</label>
+                <input asp-for="Work" type="text" class="form-control" />
+            </div>
+            <!-- Date Picker -->
+            <div class="mb-3">
+                <label>Date</label>
+                <input  asp-for="ReportDate" type="text" class="form-control" id="projectDate" />
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-3">
+                    <button type="submit" class="btn btn-primary form-control">Submit</button>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @section scripts {
+        <script>
+
+            $(document).ready(function () {
+                // Initialize date picker
+                $('#projectDate').datepicker({
+                    format: 'yyyy-mm-dd',
+                    autoclose: true
+                });
+            });
+        </script>
+    }
+

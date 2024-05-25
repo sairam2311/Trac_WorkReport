@@ -1,0 +1,31 @@
+﻿
+@model Designation
+
+
+<form method="post">
+    <input asp-for="DesId" hidden />
+    <div class="border p-3 mt-4">
+        <div class="row pb-2">
+            <h2 class="text-primary">Edit Designation</h2>
+        </div>
+        <div class="mb-3">
+            <label>Designation Abbrivation </label>
+            <input asp-for="DesShort" type="text" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Designation Full </label>
+            <input asp-for="DesFull" type="text" class="form-control" />
+        </div>
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <button type="submit" class="btn btn-primary form-control">Edit</button>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Designation" asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
+            </div>
+
+        </div>
+
+    </div>
+</form>

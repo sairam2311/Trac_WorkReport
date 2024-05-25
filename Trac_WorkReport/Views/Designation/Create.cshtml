@@ -1,0 +1,72 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@*@model Designation
+
+
+<form method="post">
+    <div class="border p-3 mt-4">
+        <div class="row pb-2">
+            <h2 class="text-primary">Add Designation</h2>
+        </div>
+        <div class="mb-3">
+            <label>Designation Abbrivation </label>
+            <input asp-for="DesShort" type="text" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Designation Full </label>
+            <input asp-for="DesFull" type="text" class="form-control" />
+        </div>
+        <div class="row">   
+            <div class="col-6 col-md-3">
+            <button type="submit" class="btn btn-primary form-control" >Submit</button>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Designation" asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
+            </div>
+
+        </div>
+
+        </div>
+</form>*@
+
+@model Designation
+
+<form method="post">
+    <div class="container">
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="card-title mb-0">Add Designation</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="DesShort" class="form-label">Designation Abbreviation</label>
+                            <input asp-for="DesShort" id="DesShort" type="text" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="DesFull" class="form-label">Designation Full Name</label>
+                            <input asp-for="DesFull" id="DesFull" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100">Submit</button>
+                            </div>
+                            <div class="col-md-6">
+                                <a asp-controller="Designation" asp-action="Index" class="btn btn-outline-secondary w-100">Back to List</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
