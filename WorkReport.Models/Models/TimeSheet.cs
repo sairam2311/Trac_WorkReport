@@ -15,6 +15,8 @@ namespace WorkReport.Models.Models
         public string Work { get; set; } = string.Empty;
         public string AssignedBy { get; set; }
 
+       
+
         public string RemarksBbyReOf { get; set; } = string.Empty;
 
         public string RemarksbyRpOf { get; set; } = string.Empty;

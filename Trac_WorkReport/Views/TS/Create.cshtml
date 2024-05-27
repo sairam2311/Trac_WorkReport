@@ -1,56 +1,113 @@
-﻿@using WorkReport.Models.Models;
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-@model TimeSheet
+﻿
+@using WorkReport.Models.Models;
+@model UserIndexViewModelTS
 
-
-    <form method="post">
-        <div class="border p-3 mt-4">
-            <div class="row pb-2">
-                <h2 class="text-primary">Add Project</h2>
+<form method="post">
+    <div class="border p-1 mt-1">
+        <div class="row gutters-sm">
+            <div class="col-md-12">
+                <div class="card m-1">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <h6 class="mb-0 d-flex justify-content-between align-items-center">Full Name</h6>
+                            </div>
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center text-primary">
+                                @Model.CurrentUser.EmployeeName
+                            </div>
+                            <div class="col-sm-2">
+                                <h6 class="mb-0 d-flex justify-content-between align-items-center">Employee ID</h6>
+                            </div>
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center text-light">
+                                @Model.CurrentUser.EmployeeID
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <h6 class="mb-0 d-flex justify-content-between align-items-center">Reporting Officer</h6>
+                            </div>
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center text-success">
+                                @if (string.IsNullOrEmpty(Model.CurrentUser.ReportingOfficerName))
+                                {
+                                    <span class="text-danger">No Reporting Officer Assigned</span>
+                                }
+                                else
+                                {
+                                    <span class="text-success">@Model.CurrentUser.ReportingOfficerName</span>
+                                }
+                            </div>
+                            <div class="col-sm-2">
+                                <h6 class="mb-0 d-flex justify-content-between align-items-center">Designation</h6>
+                            </div>
+                            <div class="col-sm-4 d-flex justify-content-between align-items-center text-info">
+                                @foreach (var role in Model.CurrentUser.Roles)
+                                {
+                                    <span>@role.RoleName</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label>Project Number</label>
-                <input asp-for="Work" type="text" class="form-control" />
-            </div>
-         @*   <div class="mb-3">
-                <label>Project Name</label>
-                <input asp-for="Work" type="text" class="form-control" />
-            </div>*@
+        </div>
+    </div>
 
+    <div class="border p-3 mt-4">
+        <div class="row pb-2">
+            <h2 class="text-primary">Add Project</h2>
+        </div>
         <div class="mb-3">
-            <label for="WorkDis" class="form-label mt-4">Work Description</label>
-            <textarea asp-for="Work" class="form-control" id="WorkDis" rows="5"></textarea>
+            <label asp-for="TimeSheet.Work" class="form-label">Project Number</label>
+            <input asp-for="TimeSheet.Work" class="form-control" />
+            <span asp-validation-for="TimeSheet.Work" class="text-danger"></span>
         </div>
-            <!-- Date Picker -->
-            <div class="mb-3">
-                <label>Date</label>
-                <input  asp-for="ReportDate" type="text" class="form-control" id="projectDate" />
+        <div class="mb-3">
+            <label asp-for="TimeSheet.EmployeeGUID" class="form-label mt-4">Work Description</label>
+            <textarea asp-for="TimeSheet.EmployeeGUID" class="form-control" id="WorkDis" rows="5"></textarea>
+            <span asp-validation-for="TimeSheet.EmployeeGUID" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="TimeSheet.ReportDate" class="form-label">Date</label>
+           @* <input asp-for="TimeSheet.ReportDate" type="text" class="form-control" id="projectDate" />*@
+            <input type="text" id="projectdate" asp-for="TimeSheet.ReportDate" name="projectdate" class="form-control" placeholder="Select date" autocomplete="off" />
+
+            <span asp-validation-for="TimeSheet.ReportDate" class="text-danger"></span>
+          
+        </div>
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <button type="submit" class="btn btn-primary form-control">Submit</button>
             </div>
-            <div class="row">
-                <div class="col-6 col-md-3">
-                    <button type="submit" class="btn btn-primary form-control">Submit</button>
-                </div>
-                <div class="col-6 col-md-3">
-                    <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
-                </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
             </div>
         </div>
-    </form>
+    </div>
+</form>
 
-    @section scripts {
-        <script>
 
-            $(document).ready(function () {
-                // Initialize date picker
-                $('#projectDate').datepicker({
-                    format: 'yyyy-mm-dd',
-                    autoclose: true
-                });
+   @section scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize the date picker for the projectdate field
+            $('#projectdate').datetimepicker({
+                format: 'YYYY-MM-DD', // Set the desired date format
+                icons: {
+                    time: 'bi bi-clock', // Customize the icons if needed
+                    date: 'bi bi-calendar',
+                    up: 'bi bi-arrow-up',
+                    down: 'bi bi-arrow-down',
+                    previous: 'bi bi-chevron-left',
+                    next: 'bi bi-chevron-right',
+                    today: 'bi bi-calendar-check',
+                    clear: 'bi bi-trash',
+                    close: 'bi bi-x'
+                }
             });
-        </script>
-    }
+        });
+    </script>
+
+}
+
 
