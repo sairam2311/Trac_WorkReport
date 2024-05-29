@@ -1,9 +1,10 @@
-﻿
-@using WorkReport.Models.Models;
+﻿@using WorkReport.Models.Models;
 @model UserIndexViewModelTS
 
 <form method="post">
+    <!-- User Information Section -->
     <div class="border p-1 mt-1">
+        <!-- User Information Card -->
         <div class="row gutters-sm">
             <div class="col-md-12">
                 <div class="card m-1">
@@ -53,6 +54,7 @@
         </div>
     </div>
 
+    <!-- Project Addition Form -->
     <div class="border p-3 mt-4">
         <div class="row pb-2">
             <h2 class="text-primary">Add Project</h2>
@@ -69,45 +71,16 @@
         </div>
         <div class="mb-3">
             <label asp-for="TimeSheet.ReportDate" class="form-label">Date</label>
-           @* <input asp-for="TimeSheet.ReportDate" type="text" class="form-control" id="projectDate" />*@
-            <input type="text" id="projectdate" asp-for="TimeSheet.ReportDate" name="projectdate" class="form-control" placeholder="Select date" autocomplete="off" />
-
+            <div class="input-group date" id="datetimepicker1" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                <input type="text" class="form-control datetimepicker-input" data-td-target="#datetimepicker1" />
+                <span class="input-group-text" data-td-target="#datetimepicker1" data-td-toggle="datetimepicker">
+                    <i class="bi bi-calendar"></i>
+                </span>
+            </div>
             <span asp-validation-for="TimeSheet.ReportDate" class="text-danger"></span>
-          
         </div>
-        <div class="row">
-            <div class="col-6 col-md-3">
-                <button type="submit" class="btn btn-primary form-control">Submit</button>
-            </div>
-            <div class="col-6 col-md-3">
-                <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-secondary form-control">Back to List</a>
-            </div>
-        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
     </div>
 </form>
-
-
-   @section scripts {
-    <script>
-        $(document).ready(function () {
-            // Initialize the date picker for the projectdate field
-            $('#projectdate').datetimepicker({
-                format: 'YYYY-MM-DD', // Set the desired date format
-                icons: {
-                    time: 'bi bi-clock', // Customize the icons if needed
-                    date: 'bi bi-calendar',
-                    up: 'bi bi-arrow-up',
-                    down: 'bi bi-arrow-down',
-                    previous: 'bi bi-chevron-left',
-                    next: 'bi bi-chevron-right',
-                    today: 'bi bi-calendar-check',
-                    clear: 'bi bi-trash',
-                    close: 'bi bi-x'
-                }
-            });
-        });
-    </script>
-
-}
-
 
