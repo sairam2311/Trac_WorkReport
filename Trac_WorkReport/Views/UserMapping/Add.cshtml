@@ -195,53 +195,28 @@
 <h1 class="mb-4">Add Employee Mapping</h1>
 
 <form method="post">
-   @* <div class="container">*@
-        <div class="row">
-            <div class="col-lg-3 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4">Employees</h5>
-                        <select class="form-select" id="SelectedEmployeeIds" name="SelectedEmployeeIds" multiple size="10">
-                            @foreach (var employee in Model.EmployeeOptions.OrderBy(u => u.Text))
-                            {
-                                <option value="@employee.Value">@employee.Text</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4">Reviewing Officer</h5>
-                        <select class="form-select" id="ReviewingOfficerId" name="ReviewingOfficerId" multiple size="10">
-                            @foreach (var officer in Model.OfficerOptions.OrderBy(u => u.Value))
-                            {
-                                <option value="@officer.Value">@officer.Text</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4">Reporting Officer</h5>
-                        <select class="form-select" id="ReportingOfficerId" name="ReportingOfficerId" multiple size="10">
-                            @foreach (var officer in Model.OfficerOptions.OrderBy(u => u.Text))
-                            {
-                                <option value="@officer.Value">@officer.Text</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-            </div>
-        <div class="col-lg-3 mb-3">
+    @* <div class="container"> *@
+    <div class="row">
+        <div class="col-lg-3 mb-1">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Project</h5>
-                    <select class="form-select" id="ProjectId" name="ProjectId" multiple size="10">
-                        @foreach (var officer in Model.Projects.OrderBy(u => u.Text))
+                    <h5 class="card-title mb-4">Employees</h5>
+                    <select class="form-select" id="SelectedEmployeeIds" name="SelectedEmployeeIds" multiple size="10">
+                        @foreach (var employee in Model.EmployeeOptions.OrderBy(e => e.Text))
+                        {
+                            <option value="@employee.Value">@employee.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 mb-1">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Reviewing Officer</h5>
+                    <select class="form-select" id="ReviewingOfficerId" name="ReviewingOfficerId" multiple size="10">
+                        @foreach (var officer in Model.OfficerOptions.OrderBy(o => o.Value))
                         {
                             <option value="@officer.Value">@officer.Text</option>
                         }
@@ -249,16 +224,45 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-3 mb-1">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Reporting Officer</h5>
+                    <select class="form-select" id="ReportingOfficerId" name="ReportingOfficerId" multiple size="10">
+                        @foreach (var officer in Model.OfficerOptions.OrderBy(o => o.Text))
+                        {
+                            <option value="@officer.Value">@officer.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
 
-        <div class="row justify-content-end">
-            <div class="col-md-3 mb-3">
-                <button type="submit" class="btn btn-primary w-100">Save</button>
-            </div>
-            <div class="col-md-3">
-                <a asp-controller="UserMapping" asp-action="Index" class="btn btn-outline-secondary w-100">Back to List</a>
+        <div class="col-lg-3 mb-1">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Project</h5>
+                    <select class="form-select" id="ProjectId" name="ProjectId" multiple size="10">
+                        @foreach (var project in Model.Projects.OrderBy(p => p.Text))
+                        {
+                            <option value="@project.Value">@project.Text</option>
+                        }
+                    </select>
+                </div>
             </div>
         </div>
-   @* </div>*@
+    </div>
+
+    <div class="row justify-content-end">
+        <div class="col-md-3 mb-3">
+            <button type="submit" class="btn btn-primary w-100">Save</button>
+        </div>
+        <div class="col-md-3">
+            <a asp-controller="UserMapping" asp-action="Index" class="btn btn-outline-secondary w-100">Back to List</a>
+        </div>
+    </div>
+    @* </div> *@
 </form>
+
 
