@@ -224,16 +224,27 @@ namespace Trac_WorkReport.Controllers
         public IActionResult Add()
         {
             // Fetch all employees
-            var employees = _userManager.Users
-                .Where(u => !string.IsNullOrWhiteSpace(u.EmployeeName))
-                .Select(u => new SelectListItem
-                {
-                    Value = u.Id,
-                    Text = u.EmployeeName
-                }).ToList();
+            var employees = new List<SelectListItem>();
+            //var employees = _userManager.Users
+            //    .Where(u => !string.IsNullOrWhiteSpace(u.EmployeeName))
+            //    .Select(u => new SelectListItem
+            //    {
+            //        Value = u.Id,
+            //        Text = u.EmployeeName
+            //    }).ToList();
+
+            //var employees1 =  _roleManager.Roles
+            //     .Where(r => r.RoleName == "SO" || r.RoleName == "ASO" || r.RoleName == "HOD" || r.RoleName == "ADG" || r.RoleName == "JD" || r.RoleName == "AO")
+            //  .SelectMany(r => r.users.)
+            // .Select(u => new SelectListItem
+            // {
+            //      Value = u.Id,
+            //      Text = u.EmployeeName
+            // }).ToList();
 
             // Fetch users for officer roles
             var officerRoles = new[] { "SO", "ASO", "HOD", "ADG", "JD", "AO" };
+            var employeeRoles = new[] { "SO", "ASO", "SA", "PA" };
             var officers = new List<SelectListItem>();
 
             foreach (var roleName in officerRoles)
@@ -243,6 +254,20 @@ namespace Trac_WorkReport.Controllers
                 {
                     var usersInRole = _userManager.GetUsersInRoleAsync(role.Name).Result;
                     officers.AddRange(usersInRole.Select(u => new SelectListItem
+                    {
+                        Value = u.Id,
+                        Text = u.EmployeeName
+                    }));
+                }
+            }
+
+            foreach (var roleName in employeeRoles)
+            {
+                var role = _roleManager.Roles.FirstOrDefault(r => r.Name == roleName);
+                if (role != null)
+                {
+                    var usersInRole = _userManager.GetUsersInRoleAsync(role.Name).Result;
+                    employees.AddRange(usersInRole.Select(u => new SelectListItem
                     {
                         Value = u.Id,
                         Text = u.EmployeeName
