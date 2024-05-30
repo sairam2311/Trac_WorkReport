@@ -32,9 +32,9 @@ namespace Trac_WorkReport.Controllers
         }
 
 
-        public IActionResult Edit(int? id)
+        public IActionResult Edit(Guid id)
         {
-            if (id == null || id == 0)
+            if (id == null || id == null)
             {
                 return NotFound();
             }
@@ -63,9 +63,9 @@ namespace Trac_WorkReport.Controllers
 
 
 
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(Guid id)
         {
-            if (id == null || id == 0)
+            if (id == null || id == null)
             {
                 return NotFound();
             }
@@ -80,7 +80,7 @@ namespace Trac_WorkReport.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePost(int? id)
+        public IActionResult DeletePost(Guid id)
         {
             Projects? obj = _ProjectsRepo.Get(u => u.ProjectId == id); if (obj == null)
             {

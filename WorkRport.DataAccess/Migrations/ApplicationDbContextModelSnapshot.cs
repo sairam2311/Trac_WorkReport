@@ -155,11 +155,9 @@ namespace WorkRport.DataAccess.Migrations
 
             modelBuilder.Entity("Trac_WorkReport.Models.Projects", b =>
                 {
-                    b.Property<int>("ProjectId")
+                    b.Property<Guid>("ProjectId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProjectId"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
@@ -292,6 +290,10 @@ namespace WorkRport.DataAccess.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProjectId")
                         .IsRequired()
                         .HasColumnType("text");
 

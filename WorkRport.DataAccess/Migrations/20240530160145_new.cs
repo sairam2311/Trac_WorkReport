@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace WorkRport.DataAccess.Migrations
 {
-    public partial class postgressql : Migration
+    public partial class @new : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -74,7 +74,8 @@ namespace WorkRport.DataAccess.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     EmployeeId = table.Column<string>(type: "text", nullable: false),
                     ReviewingOfficerId = table.Column<string>(type: "text", nullable: false),
-                    ReportingOfficerId = table.Column<string>(type: "text", nullable: false)
+                    ReportingOfficerId = table.Column<string>(type: "text", nullable: false),
+                    ProjectId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,8 +86,7 @@ namespace WorkRport.DataAccess.Migrations
                 name: "Projects",
                 columns: table => new
                 {
-                    ProjectId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProjectId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProjectNumber = table.Column<string>(type: "text", nullable: false),
                     ProjectName = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true)

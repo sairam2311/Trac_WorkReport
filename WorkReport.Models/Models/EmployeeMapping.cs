@@ -12,5 +12,6 @@ namespace WorkReport.Models.Models
         public string EmployeeId { get; set; }
         public string ReviewingOfficerId { get; set; }
         public string ReportingOfficerId { get; set; }
+        public string ProjectId { get; set; }
     }
 }
