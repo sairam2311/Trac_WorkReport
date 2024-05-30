@@ -420,196 +420,55 @@
 }
 *@
 
-@*@using WorkReport.Models.Models
-@model UserIndexViewModelTS
-
-<form method="post">
-    <!-- User Information Section -->
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">User Information</h5>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="fullName">Full Name</label>
-                            <input type="text" class="form-control" id="fullName" value="@Model.CurrentUser.EmployeeName" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="employeeID">Employee ID</label>
-                            <input type="text" class="form-control" id="employeeID" value="@Model.CurrentUser.EmployeeID" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="reportingOfficer">Reporting Officer</label>
-                            <input type="text" class="form-control" id="reportingOfficer" value="@Model.CurrentUser.ReportingOfficerName" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="designation">Designation</label>
-                            <input type="text" class="form-control" id="designation" value="@Model.CurrentUser.Roles.FirstOrDefault()?.RoleName" readonly>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Project Addition Form -->
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title text-primary">Add Project</h5>
-                <hr>
-                <div class="form-group">
-                    <label for="reportDate">Date</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control datepicker" id="reportDate" placeholder="Report Date" readonly>
-                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="workDetails">Work Details</label>
-                    <textarea class="form-control" id="workDetails" rows="6" placeholder="Enter your Work Details"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </div>
-    </div>
-</form>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            var today = new Date();
-            var formattedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
-
-            $('.datepicker').datepicker({
-                format: 'mm/dd/yyyy',
-                todayHighlight: true,
-                autoclose: true,
-                endDate: today,
-                orientation: 'auto'
-            }).val(formattedDate);
-
-            $('.datepicker').on('click', function () {
-                $(this).datepicker('show');
-            });
-        });
-    </script>
-}*@
-
-@*@using WorkReport.Models.Models
-@model UserIndexViewModelTS
-
-<form method="post">
-    <!-- User Information Section -->
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">User Information</h5>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="fullName">Full Name</label>
-                            <input type="text" class="form-control" id="fullName" value="@Model.CurrentUser.EmployeeName" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="employeeID">Employee ID</label>
-                            <input type="text" class="form-control" id="employeeID" value="@Model.CurrentUser.EmployeeID" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="reportingOfficer">Reporting Officer</label>
-                            <input type="text" class="form-control" id="reportingOfficer" value="@Model.CurrentUser.ReportingOfficerName" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="designation">Designation</label>
-                            <input type="text" class="form-control" id="designation" value="@Model.CurrentUser.Roles.FirstOrDefault()?.RoleName" readonly>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Project Addition Form -->
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title text-primary">Add Project</h5>
-                <hr>
-                <div class="form-group">
-                    <label for="reportDate">Date</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control datepicker" id="reportDate" placeholder="Select Date" readonly>
-                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="workDetails">Work Details</label>
-                    <textarea class="form-control" id="workDetails" rows="6" placeholder="Enter your Work Details"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </div>
-    </div>
-</form>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            var today = new Date();
-            var formattedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
-
-            $('.datepicker').datepicker({
-                format: 'mm/dd/yyyy',
-                todayHighlight: true,
-                autoclose: true,
-                endDate: today,
-                orientation: 'auto'
-            }).val(formattedDate);
-
-            // Trigger datepicker only when the datepicker icon is clicked
-            $('.input-group-text').on('click', function () {
-                $('.datepicker').datepicker('show');
-            });
-        });
-    </script>
-}*@
-
 @using WorkReport.Models.Models
 @model UserIndexViewModelTS
 
 <form method="post">
     <!-- User Information Section -->
-    <div class="container mt-4">
-        <div class="card shadow">
-            <div class="card-body">
-                <h5 class="card-title">User Information</h5>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="fullName">Full Name</label>
-                            <input type="text" class="form-control" id="fullName" value="@Model.CurrentUser.EmployeeName" readonly>
+    <div class="border p-1 mt-1">
+        <!-- User Information Card -->
+        <div class="row gutters-sm">
+            <div class="col-md-12">
+                <div class="card m-1">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <h6 class="mb-0">Full Name</h6>
+                            </div>
+                            <div class="col-sm-4 text-primary">
+                                @Model.CurrentUser.EmployeeName
+                            </div>
+                            <div class="col-sm-2">
+                                <h6 class="mb-0">Employee ID</h6>
+                            </div>
+                            <div class="col-sm-4 text-light">
+                                @Model.CurrentUser.EmployeeID
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="employeeID">Employee ID</label>
-                            <input type="text" class="form-control" id="employeeID" value="@Model.CurrentUser.EmployeeID" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="reportingOfficer">Reporting Officer</label>
-                            <input type="text" class="form-control" id="reportingOfficer" value="@Model.CurrentUser.ReportingOfficerName" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="designation">Designation</label>
-                            <input type="text" class="form-control" id="designation" value="@Model.CurrentUser.Roles.FirstOrDefault()?.RoleName" readonly>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <h6 class="mb-0">Reporting Officer</h6>
+                            </div>
+                            <div class="col-sm-4">
+                                @if (string.IsNullOrEmpty(Model.CurrentUser.ReportingOfficerName))
+                                {
+                                    <span class="text-danger">No Reporting Officer Assigned</span>
+                                }
+                                else
+                                {
+                                    <span class="text-success">@Model.CurrentUser.ReportingOfficerName</span>
+                                }
+                            </div>
+                            <div class="col-sm-2">
+                                <h6 class="mb-0">Designation</h6>
+                            </div>
+                            <div class="col-sm-4 text-info">
+                                @foreach (var role in Model.CurrentUser.Roles)
+                                {
+                                    <span>@role.RoleName</span>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -618,48 +477,49 @@
     </div>
 
     <!-- Project Addition Form -->
-    <div class="container mt-4">
-        <div class="card shadow">
-            <div class="card-body">
-                <h5 class="card-title text-primary">Add Work</h5>
-                <hr>
-                <div class="form-group">
-                    <label for="reportDate">Date</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control datepicker" id="reportDate" placeholder="Select Date" readonly>
-                        <span class="input-group-text bg-primary text-light"><i class="bi bi-calendar"></i></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="workDetails">Work Details</label>
-                    <textarea class="form-control" id="workDetails" rows="6" placeholder="Enter your Work Details"></textarea>
-                </div>
-                <div class="text-right mt-3">
-                    <button type="submit" class="btn btn-primary btn-lg">Submit</button>
-                </div>
-            </div>
+    <div class="border p-3 mt-4">
+        <div class="row pb-2">
+            <h2 class="text-primary">Add Project</h2>
         </div>
+        <div class="mb-3">
+            <label asp-for="TimeSheet.Work" class="form-label">Project Number</label>
+            <input asp-for="TimeSheet.Work" class="form-control" />
+            <span asp-validation-for="TimeSheet.Work" class="text-danger"></span>
+        </div>
+       
+        <div class="mb-3">
+            <label asp-for="TimeSheet.ReportDate" class="form-label">Date</label>
+            <div class="input-group date" id="datepicker1">
+                <input type="text" asp-for="TimeSheet.ReportDate" class="form-control" />
+               @* <span class="input-group-text">
+                    <i class="bi bi-calendar"></i>
+                </span>*@
+            </div>
+            <span asp-validation-for="TimeSheet.ReportDate" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
     </div>
 </form>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            var today = new Date();
-            var formattedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+            //$('#datepicker1').datepicker({
+            //    format: 'mm/dd/yyyy',
+            //    todayHighlight: true,
+            //    autoclose: true
+            //}).on('show', function (e) {
+            //    if (e.date) {
+            //        $(this).data('datepicker').update();
+            //    }
+            //});
 
-            $('.datepicker').datepicker({
-                format: 'mm/dd/yyyy',
-                todayHighlight: true,
+            $("#datepicker1").datepicker({
                 autoclose: true,
-                endDate: today,
-                orientation: 'auto'
-            }).val(formattedDate);
-
-            // Trigger datepicker only when the datepicker icon is clicked
-            $('.input-group-text').on('click', function () {
-                $('.datepicker').datepicker('show');
-            });
+                 format: 'dd/mm/yyyy',
+                todayHighlight: true,
+            }).datepicker('update', new Date());
         });
     </script>
 }
