@@ -22,6 +22,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddScoped<IDesignationRepository, DesignationRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IEmployeeMapRepository, EmployeeMapRepository>();
+builder.Services.AddScoped<ITimeSheetRepository, TimeSheetRepository>();
 builder.Services.AddRazorPages();
 var app = builder.Build();
 

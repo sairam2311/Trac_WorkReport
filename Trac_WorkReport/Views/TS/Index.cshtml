@@ -132,6 +132,35 @@
 @{
     ViewData["Title"] = "User Index";
 }
+@{
+    string[] allowedRoles = { "SO", "ASO", "ADG", "LO", "AO", "HOD" };
+    bool userHasAllowedRole = false;
+
+    // Check if the user has any of the allowed roles
+    foreach (var role in allowedRoles)
+    {
+        if (User.IsInRole(role))
+        {
+            userHasAllowedRole = true;
+            break; // Exit the loop once a matching role is found
+        }
+    }
+}
+
+@{
+    string[] allowedRoles1 = {  "SA", "ASO", "PA", "HOD" };
+    bool userHasAllowedRole1 = false;
+
+    // Check if the user has any of the allowed roles
+    foreach (var role in allowedRoles1)
+    {
+        if (User.IsInRole(role))
+        {
+            userHasAllowedRole1 = true;
+            break; // Exit the loop once a matching role is found
+        }
+    }
+}
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -180,6 +209,8 @@
                         </div>
                     </div>
                     <hr>
+                    @if (userHasAllowedRole1)
+{
                     <div class="row">
                         <div class="col text-end">
                             <a asp-controller="TS" asp-action="Create" class="btn btn-primary">
@@ -187,6 +218,7 @@
                             </a>
                         </div>
                     </div>
+}
                 </div>
             </div>
         </div>
@@ -195,7 +227,7 @@
 
 
 
-@if (User.IsInRole("SO") || User.IsInRole("ASO"))
+@if (userHasAllowedRole)
 {
 
 <h4 class="mt-5 text-center">Employees List</h4>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,20 @@ namespace WorkReport.Models.Models
 {
     public class UserIndexViewModelTS
     {
-        public EditUserViewModelTS CurrentUser { get; set; }
-        public List<EditUserViewModelTS> AllUsersWithRoles { get; set; }
+
+        [ValidateNever]
+        public IEnumerable<TimeSheet> TimeSheets { get; set; } // Add this property
+
         public TimeSheet TimeSheet { get; set; } // Add TimeSheet property
 
+        [ValidateNever]
+        public EditUserViewModelTS CurrentUser { get; set; }
+        [ValidateNever]
+        public List<EditUserViewModelTS> AllUsersWithRoles { get; set; }
+        [ValidateNever]
+
         public List<EmployeeWithRole> employeeWithRoles { get; set; }
+
     }
 
     public class EditUserViewModelTS
@@ -24,6 +34,8 @@ namespace WorkReport.Models.Models
         public List<RoleViewModelTS> Roles { get; set; }
         public string ReportingOfficerName { get; set; }
         public string ReviewingofficerName { get; set; }
+
+     
     }
 
     public class RoleViewModelTS

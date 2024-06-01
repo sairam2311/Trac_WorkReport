@@ -584,13 +584,14 @@
 @using WorkReport.Models.Models
 @model UserIndexViewModelTS
 
-<form method="post">
+<form asp-action="Create" method="post">
     <!-- User Information Section -->
     <div class="container mt-4">
         <div class="card shadow">
             <div class="card-body">
                 <h5 class="card-title">User Information</h5>
                 <hr>
+               @* //<input id="" asp-for="@Model.CurrentUser.Id" hidden />*@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -624,15 +625,15 @@
                 <h5 class="card-title text-primary">Add Work</h5>
                 <hr>
                 <div class="form-group">
-                    <label for="reportDate">Date</label>
+                    <label asp-for="TimeSheet.ReportDate">Date</label>
                     <div class="input-group">
-                        <input type="text" class="form-control datepicker" id="reportDate" placeholder="Select Date" readonly>
+                        <input type="text" class="form-control datepicker" asp-for="TimeSheet.ReportDate" placeholder="Select Date" readonly>
                         <span class="input-group-text bg-primary text-light"><i class="bi bi-calendar"></i></span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="workDetails">Work Details</label>
-                    <textarea class="form-control" id="workDetails" rows="6" placeholder="Enter your Work Details"></textarea>
+                    <label asp-for="TimeSheet.Work">Work Details</label>
+                    <textarea class="form-control" asp-for="TimeSheet.Work" rows="6" placeholder="Enter your Work Details"></textarea>
                 </div>
                 <div class="text-right mt-3">
                     <button type="submit" class="btn btn-primary btn-lg">Submit</button>
@@ -649,7 +650,7 @@
             var formattedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
 
             $('.datepicker').datepicker({
-                format: 'mm/dd/yyyy',
+                format: 'dd/mm/yyyy',
                 todayHighlight: true,
                 autoclose: true,
                 endDate: today,

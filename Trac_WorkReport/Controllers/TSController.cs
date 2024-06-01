@@ -607,12 +607,14 @@ namespace Trac_WorkReport.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IEmployeeMapRepository _employeeMapRep;
+        private readonly ITimeSheetRepository _timeSheetRepository;
 
-        public TSController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IEmployeeMapRepository employeeMapRep)
+        public TSController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IEmployeeMapRepository employeeMapRep, ITimeSheetRepository timeSheetRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _employeeMapRep = employeeMapRep;
+            _timeSheetRepository = timeSheetRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -649,6 +651,11 @@ namespace Trac_WorkReport.Controllers
             var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(currentUser.Id);
             var RRemployees = _employeeMapRep.GeEmployeesbyrevieworRep(currentUser.Id);
 
+            // Get the timesheets for the current user
+            var timeSheets = _timeSheetRepository.GetTimeSheetsByEmployeeId(currentUser.Id);
+
+            //var reportbyid = _timeSheetRepository.Get(TimeSheet as TimeSheet);
+
             //foreach(var emp in RRemployees)
             //{
             //    allRREmps.Add(new EmployeeWithRole
@@ -677,7 +684,8 @@ namespace Trac_WorkReport.Controllers
                     }).ToList()
                 },
                 AllUsersWithRoles = allUsersWithRoles,
-                employeeWithRoles = RRemployees
+                employeeWithRoles = RRemployees,
+                TimeSheets = timeSheets // Add timesheets to the model
             };
 
             return View(model);
@@ -741,15 +749,39 @@ namespace Trac_WorkReport.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(UserIndexViewModelTS model)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
             if (ModelState.IsValid)
             {
-                var timeSheet = model.TimeSheet;
-                // _timeSheetRepository.Add(timeSheet);
-                // await _timeSheetRepository.SaveAsync();
+                // var timeSheet = model.TimeSheet;
+
+                var timeSheet = new TimeSheet
+                {
+                    EmployeeGUID = currentUser.Id,
+                    Work = model.TimeSheet.Work,
+                    AssignedBy = "Self Reporting",
+                    CurrentDate = model.TimeSheet.CurrentDate.Date,
+                    RemarksBbyReOf = model.TimeSheet.RemarksBbyReOf,
+                    RemarksbyRpOf = model.TimeSheet.RemarksbyRpOf,
+                    ReportDate = model.TimeSheet.ReportDate.Date
+
+
+                };
+              
+
+                //var timeSheet = new TimeSheet
+                //{
+                //    EmployeeGUID = model.TimeSheet.EmployeeGUID,
+                //    Work = model.TimeSheet.Work,
+                //    AssignedBy = model.TimeSheet.AssignedBy,
+                //    ReportDate = model.TimeSheet.ReportDate,
+                //    // Populate other properties as needed
+                //};
+                   _timeSheetRepository.Add(timeSheet);
+                  _timeSheetRepository.save();
                 return RedirectToAction(nameof(Index));
             }
 
-            var currentUser = await _userManager.GetUserAsync(User);
+            
             var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
             var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(currentUser.Id);
             var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(currentUser.Id);
