@@ -626,6 +626,7 @@ namespace Trac_WorkReport.Controllers
             var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
             var allUsers = _userManager.Users.ToList();
             var allUsersWithRoles = new List<EditUserViewModelTS>();
+            var allRREmps = new List<EmployeeWithRole>();
 
             foreach (var user in allUsers)
             {
@@ -646,6 +647,18 @@ namespace Trac_WorkReport.Controllers
 
             var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(currentUser.Id);
             var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(currentUser.Id);
+            var RRemployees = _employeeMapRep.GeEmployeesbyrevieworRep(currentUser.Id);
+
+            //foreach(var emp in RRemployees)
+            //{
+            //    allRREmps.Add(new EmployeeWithRole
+            //    {
+            //        Id = emp.Id,
+            //        employeeID = emp.employeeID,
+            //        EmployeeName = emp.EmployeeName,
+            //        RoleName = emp.RoleName
+            //    });
+            //}
 
             var model = new UserIndexViewModelTS
             {
@@ -663,7 +676,8 @@ namespace Trac_WorkReport.Controllers
                         IsSelected = true
                     }).ToList()
                 },
-                AllUsersWithRoles = allUsersWithRoles
+                AllUsersWithRoles = allUsersWithRoles,
+                employeeWithRoles = RRemployees
             };
 
             return View(model);

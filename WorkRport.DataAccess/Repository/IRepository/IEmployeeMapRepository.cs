@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Trac_WorkReport.Models;
 using WorkReport.Models.Models;
+using static WorkRport.DataAccess.Repository.EmployeeMapRepository;
 
 namespace WorkRport.DataAccess.Repository.IRepository
 {
@@ -22,5 +23,7 @@ namespace WorkRport.DataAccess.Repository.IRepository
         string GetReviewingOfficerName(string employeeId);
 
         string GetReportingOfficerName(string employeeId);
+
+        List<EmployeeWithRole> GeEmployeesbyrevieworRep(string employeeId);
     }
 }

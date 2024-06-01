@@ -86,5 +86,51 @@ namespace WorkRport.DataAccess.Repository
 
             return reportingingOfficerName;
         }
+
+        public List<EmployeeWithRole> GeEmployeesbyrevieworRep(string employeeId)
+        {
+            //var employeesUnderReportingOfficer = (from empMap in _db.employeeMappings
+            //                                      join emp in _db.Users on empMap.EmployeeId equals emp.Id
+            //                                      join reportingOfficer in _db.Users on empMap.ReportingOfficerId equals reportingOfficer.Id || empMap.ReviewingOfficerId equals reportingOfficer.Id
+
+            //                                      join userRole in _db.UserRoles on emp.Id equals userRole.UserId
+            //                                      join role in _db.Roles on userRole.RoleId equals role.Id
+            //                                      where empMap.ReportingOfficerId == employeeId
+            //                                      select new EmployeeWithRole
+            //                                      {
+            //                                          Id = emp.Id,
+            //                                          employeeID = emp.EmployeeID,
+            //                                          EmployeeName = emp.EmployeeName,
+            //                                          RoleName = role.Name
+            //                                      }).ToList();
+
+            //return employeesUnderReportingOfficer;
+
+
+            var employeesUnderReportingOfficer = (from empMap in _db.employeeMappings
+                                                  join emp in _db.Users on empMap.EmployeeId equals emp.Id
+                                                  join reportingOfficer in _db.Users on empMap.ReportingOfficerId equals reportingOfficer.Id
+                                                  join reviewingOfficer in _db.Users on empMap.ReviewingOfficerId equals reviewingOfficer.Id into roGroup
+                                                  from reviewingOfficer in roGroup.DefaultIfEmpty() // Left join for reviewing officer
+                                                  join userRole in _db.UserRoles on emp.Id equals userRole.UserId
+                                                  join role in _db.Roles on userRole.RoleId equals role.Id
+                                                  where empMap.ReportingOfficerId == employeeId || empMap.ReviewingOfficerId == employeeId
+                                                  select new EmployeeWithRole
+                                                  {
+                                                      Id = emp.Id,
+                                                      employeeID = emp.EmployeeID,
+                                                      EmployeeName = emp.EmployeeName,
+                                                      RoleName = role.Name
+                                                  }).ToList();
+
+            return employeesUnderReportingOfficer;
+        }
+
+        //// Define the EmployeeWithRole class to hold the result
+        //public class EmployeeWithRole
+        //{
+          
+        //}
+
     }
 }

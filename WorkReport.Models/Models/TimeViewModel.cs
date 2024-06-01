@@ -11,6 +11,8 @@ namespace WorkReport.Models.Models
         public EditUserViewModelTS CurrentUser { get; set; }
         public List<EditUserViewModelTS> AllUsersWithRoles { get; set; }
         public TimeSheet TimeSheet { get; set; } // Add TimeSheet property
+
+        public List<EmployeeWithRole> employeeWithRoles { get; set; }
     }
 
     public class EditUserViewModelTS
@@ -28,5 +30,13 @@ namespace WorkReport.Models.Models
     {
         public string RoleName { get; set; }
         public bool IsSelected { get; set; }
+    }
+
+    public class EmployeeWithRole
+    {
+        public string Id { get; set; }
+        public string employeeID { get; set; }
+        public string EmployeeName { get; set; }
+        public string RoleName { get; set; }
     }
 }

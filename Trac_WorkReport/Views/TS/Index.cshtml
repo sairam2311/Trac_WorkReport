@@ -15,7 +15,7 @@
 
 @* For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860 *@
 @{
-}
+}@*
 @using WorkReport.Models.Models;
 @model UserIndexViewModelTS
 
@@ -23,62 +23,60 @@
     ViewData["Title"] = "User Index";
 }
 
-
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow-sm">
-                <div class="card-header">
-                    User Details
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">User Details</h4>
                 </div>
-                <div class="card-body card-body-custom">
-                    <div class="row info-row">
+                <div class="card-body">
+                    <div class="row mb-3">
                         <div class="col-sm-2">
-                            <span class=" col-form-label">Full Name</span>
+                            <label class="col-form-label">Full Name</label>
                         </div>
                         <div class="col-sm-4">
-                            <span class="form-control-plaintext text-primary fw-bold">@Model.CurrentUser.EmployeeName</span>
+                            <p class="form-control-plaintext text-primary fw-bold">@Model.CurrentUser.EmployeeName</p>
                         </div>
                         <div class="col-sm-2">
-                            <span class="col-sm-2 col-form-label">Employee ID</span>
+                            <label class="col-form-label">Employee ID</label>
                         </div>
                         <div class="col-sm-4">
-                            <span class="form-control-plaintext text-secondary">@Model.CurrentUser.EmployeeID</span>
+                            <p class="form-control-plaintext text-secondary">@Model.CurrentUser.EmployeeID</p>
                         </div>
                     </div>
                     <hr>
-                    <div class="row info-row">
+                    <div class="row mb-3">
                         <div class="col-sm-2">
-                            <span class="col-sm-2 col-form-label">Reporting Officer</span>
+                            <label class="col-form-label">Reporting Officer</label>
                         </div>
                         <div class="col-sm-4">
                             @if (string.IsNullOrEmpty(Model.CurrentUser.ReportingOfficerName))
                             {
-                                <span class="form-control-plaintext text-danger">No Reporting Officer Assigned</span>
+                                <p class="form-control-plaintext text-danger">No Reporting Officer Assigned</p>
                             }
                             else
                             {
-                                <span class="form-control-plaintext text-success">@Model.CurrentUser.ReportingOfficerName</span>
+                                <p class="form-control-plaintext text-success">@Model.CurrentUser.ReportingOfficerName</p>
                             }
                         </div>
                         <div class="col-sm-2">
-                            <span class="col-sm-2 col-form-label">Designation</span>
+                            <label class="col-form-label">Designation</label>
                         </div>
                         <div class="col-sm-4">
                             @foreach (var role in Model.CurrentUser.Roles)
                             {
-                                <span class="form-control-plaintext text-light me-1">@role.RoleName</span>
+                                <span class="badge bg-secondary me-1">@role.RoleName</span>
                             }
                         </div>
                     </div>
                     <hr>
-                    <div class="row info-row">
+                    <div class="row mb-3">
                         <div class="col-sm-2">
-                            <span class="col-sm-2 col-form-label">Reviewing Officer</span>
+                            <label class="col-form-label">Reviewing Officer</label>
                         </div>
                         <div class="col-sm-4">
-                            <span class="form-control-plaintext text-danger">@Model.CurrentUser.ReviewingofficerName</span>
+                            <p class="form-control-plaintext text-danger">@Model.CurrentUser.ReviewingofficerName</p>
                         </div>
                         <div class="col-sm-6 text-end">
                             <a asp-controller="TS" asp-action="Create" class="btn btn-primary">
@@ -91,6 +89,156 @@
         </div>
     </div>
 </div>
+
+<h4 class="mt-5">Employees List</h4>
+<div class="row mt-4">
+    <div class="col-md-12">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Employee Number</th>
+                    <th>Employee Name</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in Model.employeeWithRoles.OrderBy(p => p.EmployeeName))
+                {
+                    <tr>
+                        <td>@emp.employeeID</td>
+                        <td>@emp.EmployeeName</td>
+                        <td>@emp.RoleName</td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a asp-controller="Projects" asp-action="Edit" asp-route-id="@emp.Id" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-pencil-square"></i> View Report
+                                </a>
+                                <a asp-controller="Projects" asp-action="Delete" asp-route-id="@emp.Id" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-plus-circle"></i> Assign Work
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+*@
+@using WorkReport.Models.Models;
+@model UserIndexViewModelTS
+
+@{
+    ViewData["Title"] = "User Index";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">User Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name:</label>
+                                <p class="form-text">@Model.CurrentUser.EmployeeName</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Employee ID:</label>
+                                <p class="form-text">@Model.CurrentUser.EmployeeID</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Reporting Officer:</label>
+                                <p class="form-text">@if (string.IsNullOrEmpty(Model.CurrentUser.ReportingOfficerName))
+                                    {
+                                        <span class="text-danger">No Reporting Officer Assigned</span>
+                                    }
+                                    else
+                                    {
+                                        @Model.CurrentUser.ReportingOfficerName
+                                    }</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                                <label class="form-label">Designation:</label>
+                                <p class="form-text">
+                                    @foreach (var role in Model.CurrentUser.Roles)
+                                    {
+                                        <span class="badge bg-secondary me-1">@role.RoleName</span>
+                                    }
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Reviewing Officer:</label>
+                                <p class="form-text text-danger">@Model.CurrentUser.ReviewingofficerName</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col text-end">
+                            <a asp-controller="TS" asp-action="Create" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Add Self Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@if (User.IsInRole("SO") || User.IsInRole("ASO"))
+{
+
+<h4 class="mt-5 text-center">Employees List</h4>
+<div class="row mt-4">
+    <div class="col-md-12">
+        <table class="table table-bordered table-striped">
+            <thead class="bg-dark text-white">
+                <tr>
+                    <th>Employee Number</th>
+                    <th>Employee Name</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in Model.employeeWithRoles.OrderBy(p => p.EmployeeName))
+                {
+                    <tr>
+                        <td>@emp.employeeID</td>
+                        <td>@emp.EmployeeName</td>
+                        <td>
+                            
+                                <span class=" me-1">@emp.RoleName</span>
+                          
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a asp-controller="Projects" asp-action="Edit" asp-route-id="@emp.Id" class="btn btn-primary">
+                                    <i class="bi bi-pencil-square"></i> View Report
+                                </a>
+                                <a asp-controller="Projects" asp-action="Delete" asp-route-id="@emp.Id" class="btn btn-danger">
+                                    <i class="bi bi-plus-circle"></i> Assign Work
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+}
 
 
 @*
