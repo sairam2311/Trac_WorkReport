@@ -148,7 +148,7 @@
 }
 
 @{
-    string[] allowedRoles1 = {  "SA", "ASO", "PA", "HOD" };
+    string[] allowedRoles1 = {  "SA", "ASO", "PA", "SO" };
     bool userHasAllowedRole1 = false;
 
     // Check if the user has any of the allowed roles
@@ -226,14 +226,58 @@
 </div>
 
 
+<h4 class="mt-5 text-center">Work Reports</h4>
+<div class="row mt-4">
+    <div class="col-md-12">
+        <table class="table table-bordered table-striped dataTable">
+            <thead class="bg-dark text-white">
+                <tr>
+                    <th>Work</th>
+                    <th>Assigned By</th>
+                    <th>Report Date</th>
+                    <th>Day the report was updated</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in Model.TimeSheets.OrderBy(p => p.ReportDate))
+                {
+                    <tr>
+                        <td>@emp.Work</td>
+                        <td>@emp.AssignedBy</td>
+                        <td>@emp.ReportDate</td>
+                        <td>@emp.CurrentDate</td>
+                        @*<td>
+
+                            <span class=" me-1">@emp.</span>
+
+                        </td>*@
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a asp-controller="Projects" asp-action="Edit" asp-route-id="@emp.TSid" class="btn btn-primary">
+                                    <i class="bi bi-pencil-square"></i> View Report
+                                </a>
+                                <a asp-controller="Projects" asp-action="Delete" asp-route-id="@emp.TSid" class="btn btn-danger">
+                                    <i class="bi bi-plus-circle"></i> Assign Work
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
 
 @if (userHasAllowedRole)
 {
 
 <h4 class="mt-5 text-center">Employees List</h4>
 <div class="row mt-4">
-    <div class="col-md-12">
-        <table class="table table-bordered table-striped">
+    <div class="col-md-12"> 
+            <table class="table table-bordered table-striped dataTable">
             <thead class="bg-dark text-white">
                 <tr>
                     <th>Employee Number</th>

@@ -759,10 +759,15 @@ namespace Trac_WorkReport.Controllers
                     EmployeeGUID = currentUser.Id,
                     Work = model.TimeSheet.Work,
                     AssignedBy = "Self Reporting",
-                    CurrentDate = model.TimeSheet.CurrentDate.Date,
-                    RemarksBbyReOf = model.TimeSheet.RemarksBbyReOf,
-                    RemarksbyRpOf = model.TimeSheet.RemarksbyRpOf,
-                    ReportDate = model.TimeSheet.ReportDate.Date
+                    //CurrentDate = model.TimeSheet.CurrentDate.Date,
+                    RemarksByReOf = model.TimeSheet.RemarksByReOf,
+                    RemarksByRpOf = model.TimeSheet.RemarksByRpOf,
+                    // Adjust for UTC +5:30
+                    ReportDate = DateTime.SpecifyKind(model.TimeSheet.ReportDate, DateTimeKind.Utc)
+                    //.AddHours(5).AddMinutes(30)
+
+                    //ReportDate = DateTime.SpecifyKind(model.TimeSheet.ReportDate, DateTimeKind.Utc), // Ensure ReportDate is UTC
+                    //ReportDate = model.TimeSheet.ReportDate.Date
 
 
                 };

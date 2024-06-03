@@ -584,6 +584,11 @@
 @using WorkReport.Models.Models
 @model UserIndexViewModelTS
 
+@{
+    // Convert UTC +5:30 to local time
+    var localDate = DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("dd/MM/yyyy");
+}
+
 <form asp-action="Create" method="post">
     <!-- User Information Section -->
     <div class="container mt-4">
@@ -647,7 +652,16 @@
     <script>
         $(document).ready(function () {
             var today = new Date();
-            var formattedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+           // var formattedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+           // var formattedDate = '@localDate';
+
+            //// Adjust the date and time to UTC+5:30 timezone
+            //today.setHours(today.getHours() + 5); // Add 5 hours
+            //today.setMinutes(today.getMinutes() + 30); // Add 30 minutes
+
+            //var formattedDate = (today.getDate() < 10 ? '0' : '') + today.getDate() + '/' + ((today.getMonth() + 1) < 10 ? '0' : '') + (today.getMonth() + 1) + '/' + today.getFullYear() + ' ' + ((today.getHours() < 10 ? '0' : '') + today.getHours()) + ':' + ((today.getMinutes() < 10 ? '0' : '') + today.getMinutes());
+
+            var formattedDate = (today.getDate() < 10 ? '0' : '') + today.getDate() + '/' + ((today.getMonth() + 1) < 10 ? '0' : '') + (today.getMonth() + 1) + '/' + today.getFullYear() + ' ' + ((today.getHours() < 10 ? '0' : '') + today.getHours()) + ':' + ((today.getMinutes() < 10 ? '0' : '') + today.getMinutes());
 
             $('.datepicker').datepicker({
                 format: 'dd/mm/yyyy',
