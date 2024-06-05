@@ -23,6 +23,8 @@ namespace WorkReport.Models.Models
 
         public List<EmployeeWithRole> employeeWithRoles { get; set; }
 
+        public List<ViewReportViewModel> reportViewModels { get; set; }
+
     }
 
     public class EditUserViewModelTS
@@ -51,4 +53,13 @@ namespace WorkReport.Models.Models
         public string EmployeeName { get; set; }
         public string RoleName { get; set; }
     }
+
+    public class ViewReportViewModel
+    {
+        public string UserId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public IEnumerable<TimeSheet> TimeSheets { get; set; }
+    }
+
 }

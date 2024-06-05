@@ -24,12 +24,12 @@
                         <a class="nav-link" asp-area="Admin" asp-page="/Index">Admin Dashboard</a>
                     </li>
                 }
-                @if (await UserManager.IsInRoleAsync(UserManager.GetUserAsync(User).Result, "Manager"))
+             @*   @if (await UserManager.IsInRoleAsync(UserManager.GetUserAsync(User).Result, "Manager"))
                 {
                     <li class="nav-item">
                         <a class="nav-link" asp-area="Manager" asp-page="/Index">Manager Dashboard</a>
                     </li>
-                }
+                }*@
                 <li class="nav-item">
                     <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" method="post">
                         <button type="submit" class="nav-link btn btn-link">Logout</button>

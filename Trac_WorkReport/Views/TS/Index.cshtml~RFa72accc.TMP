@@ -132,7 +132,7 @@
 @{
     ViewData["Title"] = "User Index";
 
-    string[] allowedRolesForEmployeeList = { "SO","ASO", "ADG", "LO", "AO", "HOD" };
+    string[] allowedRolesForEmployeeList = { "SO", "ASO", "ADG", "LO", "AO", "HOD" };
     string[] allowedRolesForSelfReport = { "SA", "ASO", "PA", "SO" };
 
     bool userHasAllowedRoleForEmployeeList = UserHasAnyRole(allowedRolesForEmployeeList);
@@ -156,24 +156,24 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card text-white bg-secondary shadow-sm">
-                <div class="card-header">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">User Details</h4>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-sm-6">
                             <div class="mb-3">
-                                <label class="form-label ">Full Name:</label>
-                                <p class="form-text card-text  d-inline-block ms-3">@Model.CurrentUser.EmployeeName</p>
+                                <label class="form-label fw-bold">Full Name:</label>
+                                <p class="form-text">@Model.CurrentUser.EmployeeName</p>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Employee ID:</label>
-                                <p class="form-text fw-bold d-inline-block ms-3" style="color: cornsilk;">@Model.CurrentUser.EmployeeID</p>
+                                <p class="form-text">@Model.CurrentUser.EmployeeID</p>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Reporting Officer:</label>
-                                <p class="form-text d-inline-block">
+                                <p class="form-text">
                                     @if (string.IsNullOrEmpty(Model.CurrentUser.ReportingOfficerName))
                                     {
                                         <span class="text-danger">No Reporting Officer Assigned</span>
@@ -188,16 +188,16 @@
                         <div class="col-sm-6">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Designation:</label>
-                                <p class="form-text d-inline-block">
+                                <p class="form-text">
                                     @foreach (var role in Model.CurrentUser.Roles)
                                     {
-                                        <span class="card-text me-1">@role.RoleName</span>
+                                        <span class="badge bg-secondary me-1">@role.RoleName</span>
                                     }
                                 </p>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Reviewing Officer:</label>
-                                <p class="form-text text-danger d-inline-block">@Model.CurrentUser.ReviewingofficerName</p>
+                                <p class="form-text text-danger">@Model.CurrentUser.ReviewingofficerName</p>
                             </div>
                         </div>
                     </div>
@@ -218,8 +218,7 @@
     </div>
 </div>
 
-
-<div class="mt-5">
+<div class="container mt-5">
     <div class="row">
         <div class="@if (userHasAllowedRoleForEmployeeList) {
         <text>col-md-6</text>
@@ -233,7 +232,7 @@
                         <th>Work</th>
                         <th>Assigned By</th>
                         <th>Report Date</th>
-                        <th>Uploaded date</th>
+                        <th>Day the report was updated</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -243,15 +242,15 @@
                         <tr>
                             <td>@emp.Work</td>
                             <td>@emp.AssignedBy</td>
-                                <td>@emp.ReportDate.ToString("dd-MM-yyyy")</td>
-                                <td>@emp.CurrentDate.ToString("dd-MM-yyyy")</td>
+                            <td>@emp.ReportDate</td>
+                            <td>@emp.CurrentDate</td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
                                     <a asp-controller="Projects" asp-action="Edit" asp-route-id="@emp.TSid" class="btn btn-primary">
-                                        <i class="bi bi-pencil-square"></i> View
+                                        <i class="bi bi-pencil-square"></i> View Report
                                     </a>
                                     <a asp-controller="Projects" asp-action="Delete" asp-route-id="@emp.TSid" class="btn btn-danger">
-                                        <i class="bi bi-plus-circle"></i> Download Report
+                                        <i class="bi bi-plus-circle"></i> Assign Work
                                     </a>
                                 </div>
                             </td>
@@ -285,10 +284,10 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
-                                        <a asp-controller="TS" asp-action="ViewReport" asp-route-id="@emp.Id" class="btn btn-primary">
+                                        <a asp-controller="Projects" asp-action="Edit" asp-route-id="@emp.Id" class="btn btn-primary">
                                             <i class="bi bi-pencil-square"></i> View Report
                                         </a>
-                                        <a asp-controller="TS" asp-action="Awork" asp-route-id="@emp.Id" class="btn btn-danger">
+                                        <a asp-controller="Projects" asp-action="Delete" asp-route-id="@emp.Id" class="btn btn-danger">
                                             <i class="bi bi-plus-circle"></i> Assign Work
                                         </a>
                                     </div>

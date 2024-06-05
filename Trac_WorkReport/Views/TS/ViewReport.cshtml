@@ -1,0 +1,207 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@*@using WorkReport.Models.Models;
+@model UserIndexViewModelTS
+
+@{
+    ViewData["Title"] = "View Report";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Report Details</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="@Url.Action("ViewReport", "TS")">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Start Date:</label>
+                            <input type="date" class="form-control" name="startDate" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">End Date:</label>
+                            <input type="date" class="form-control" name="endDate" required />
+                        </div>
+                        <input type="hidden" name="userId" value="@Model.CurrentUser.Id" />
+                        <button type="submit" class="btn btn-primary">Apply Filter</button>
+                    </form>
+                </div>
+                 @foreach (var emp in Model.TimeSheets.OrderBy(p => p.ReportDate))
+                    {
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Report ID:</label>
+                        <p class="form-text">@emp.Work</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Report Date:</label>
+                        <p class="form-text">@emp.CurrentDate.ToString("dd-MM-yyyy")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Report Content:</label>
+                        <p class="form-text">@emp.ReportDate</p>
+                    </div>
+                    <!-- Add more fields as needed -->
+                </div>
+                }
+            </div>
+        </div>
+       
+    </div>
+</div>*@
+
+@*@using WorkReport.Models.Models;
+@model UserIndexViewModelTS
+
+
+@{
+    ViewData["Title"] = "View Report";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Report Details</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="@Url.Action("ViewReport", "TS")">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Start Date:</label>
+                            <input type="date" class="form-control" name="StartDate"  />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">End Date:</label>
+                            <input type="date" class="form-control" name="EndDate" />
+                        </div>
+                        <input type="hidden" name="UserId" value="@Model.CurrentUser.Id" />
+                        <button type="submit" class="btn btn-primary">Apply Filter</button>
+                    </form>
+                </div>
+                @if (Model.TimeSheets != null && Model.TimeSheets.Any())
+                {
+                    foreach (var emp in Model.TimeSheets.OrderBy(p => p.ReportDate))
+                    {
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Work:</label>
+                                <p class="form-text">@emp.Work</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Report Date:</label>
+                                <p class="form-text">@emp.ReportDate.ToString("dd-MM-yyyy")</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Remarks by Reviewing Officer:</label>
+                                <p class="form-text">@emp.RemarksByReOf</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Remarks by Reporting Officer:</label>
+                                <p class="form-text">@emp.RemarksByRpOf</p>
+                            </div>
+                            <!-- Add more fields as needed -->
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="card-body">
+                        <p>No reports found.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>*@
+@using WorkReport.Models.Models;
+@model UserIndexViewModelTS
+
+@{
+    ViewData["Title"] = "View Report";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Report Details</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="@Url.Action("ViewReport", "TS")">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Start Date:</label>
+                                <input type="date" class="form-control" name="reportViewModels[0].StartDate" value="@Model.reportViewModels.First().StartDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">End Date:</label>
+                                <input type="date" class="form-control" name="reportViewModels[0].EndDate" value="@Model.reportViewModels.First().EndDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-4 align-self-end">
+                                <input type="hidden" name="reportViewModels[0].UserId" value="@Model.reportViewModels.First().UserId" />
+                                <button type="submit" class="btn btn-primary">Apply Filter</button>
+                            </div>
+                        </div>
+                    </form>
+
+                   
+
+                    @if (Model.reportViewModels.First().TimeSheets != null && Model.reportViewModels.First().TimeSheets.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped dataTable">
+                                <thead class="bg-dark text-white">
+                                    <tr>
+                                        <th>Work</th>
+                                        <th>Assigned By</th>
+                                        <th>Report Date</th>
+                                        <th>Uploaded Date</th>
+                                        <th>Remarks by Reviewing Officer</th>
+                                        <th>Remarks by Reporting Officer</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var emp in Model.reportViewModels.First().TimeSheets.OrderBy(p => p.ReportDate))
+                                    {
+                                        <tr>
+                                            <td>@emp.Work</td>
+                                            <td>@emp.AssignedBy</td>
+                                            <td>@emp.ReportDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@emp.CurrentDate.ToString("dd-MM-yyyy")</td>
+                                            <td>@emp.RemarksByReOf</td>
+                                            <td>@emp.RemarksByRpOf</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <form method="post" action="@Url.Action("DownloadReport", "TS")">
+                            <input type="hidden" name="UserId" value="@Model.reportViewModels.First().UserId" />
+                            <input type="hidden" name="StartDate" value="@Model.reportViewModels.First().StartDate?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="EndDate" value="@Model.reportViewModels.First().EndDate?.ToString("yyyy-MM-dd")" />
+                            <button type="submit" class="btn btn-success mb-3">Download Report</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p>No reports found.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

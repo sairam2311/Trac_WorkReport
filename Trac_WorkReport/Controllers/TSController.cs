@@ -599,6 +599,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Trac_WorkReport.Models;
 using WorkReport.Models.Models;
+using System.Globalization;
+using System.Text;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+
+using System.IO;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Trac_WorkReport.Controllers
 {
@@ -808,5 +819,184 @@ namespace Trac_WorkReport.Controllers
 
             return View(model);
         }
+
+
+        [HttpGet]
+        public IActionResult ViewReport(string id)
+        {
+            var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(id);
+
+            var viewModel = new UserIndexViewModelTS
+            {
+                reportViewModels = new List<ViewReportViewModel>
+            {
+                new ViewReportViewModel
+                {
+                    UserId = id,
+                    TimeSheets = reports
+                }
+            }
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public IActionResult ViewReport(UserIndexViewModelTS model)
+        {
+            var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(model.reportViewModels.First().UserId);
+
+            if (model.reportViewModels.First().StartDate.HasValue && model.reportViewModels.First().EndDate.HasValue)
+            {
+                reports = reports
+                    .Where(t => t.ReportDate >= model.reportViewModels.First().StartDate && t.ReportDate <= model.reportViewModels.First().EndDate)
+                    .ToList();
+            }
+
+            model.reportViewModels.First().TimeSheets = reports;
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public IActionResult DownloadReport(string userId, DateTime? startDate, DateTime? endDate)
+        {
+            var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(userId);
+
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                reports = reports
+                    .Where(t => t.ReportDate >= startDate && t.ReportDate <= endDate)
+                    .ToList();
+            }
+
+            // var csv = GenerateCsv(reports);
+
+            // var bytes = Encoding.UTF8.GetBytes(csv);
+
+
+            //var output = new FileContentResult(bytes, "text/csv")
+            //{
+            //    FileDownloadName = $"Report_{DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture)}.csv"
+            //};
+            var user = _userManager.FindByIdAsync(userId).Result;
+
+            var pdfBytes = GeneratePdf(user, reports);
+            // var pdfBytes = GeneratePdf(reports);
+            var output = new FileContentResult(pdfBytes, "application/pdf")
+            {
+                FileDownloadName = $"Report_{DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture)}.pdf"
+            };
+            return output;
+        }
+
+        private string GenerateCsv(IEnumerable<TimeSheet> timeSheets)
+        {
+            var csv = new StringBuilder();
+            csv.AppendLine("Work,Assigned By,Report Date,Uploaded Date,Remarks by Reviewing Officer,Remarks by Reporting Officer");
+
+            foreach (var timeSheet in timeSheets)
+            {
+                csv.AppendLine($"{timeSheet.Work},{timeSheet.AssignedBy},{timeSheet.ReportDate:dd-MM-yyyy},{timeSheet.CurrentDate:dd-MM-yyyy},{timeSheet.RemarksByReOf},{timeSheet.RemarksByRpOf}");
+            }
+
+            return csv.ToString();
+        }
+
+
+        private byte[] GeneratePdf(ApplicationUser currentUser, IEnumerable<TimeSheet> timeSheets)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                var writer = new PdfWriter(memoryStream);
+                var pdf = new PdfDocument(writer);
+                var document = new Document(pdf);
+
+                // Header with User Details
+                document.Add(new Paragraph("User Details"));
+                document.Add(new Paragraph($"Employee Name: {currentUser.EmployeeName}"));
+                document.Add(new Paragraph($"Employee ID: {currentUser.EmployeeID}"));
+                document.Add(new Paragraph($"Reporting Officer: {currentUser.PhoneNumber}"));
+                document.Add(new Paragraph($"Reviewing Officer: {currentUser.Id}"));
+                document.Add(new Paragraph("\n"));
+
+                var columnWidths = new float[] { 16.67f, 16.67f, 16.67f, 16.67f, 16.67f, 16.67f }; // Six columns with equal width
+                var table = new iText.Layout.Element.Table(UnitValue.CreatePercentArray(columnWidths)).UseAllAvailableWidth();
+
+                // var table = new iText.Layout.Element.Table(UnitValue.CreatePercentArray(6)).UseAllAvailableWidth();
+
+                // Header Row
+                table.AddHeaderCell("Work");
+                table.AddHeaderCell("Assigned By");
+                table.AddHeaderCell("Report Date");
+                table.AddHeaderCell("Uploaded Date");
+                table.AddHeaderCell("Remarks by Reviewing Officer");
+                table.AddHeaderCell("Remarks by Reporting Officer");
+
+                // Data Rows
+                foreach (var timeSheet in timeSheets)
+                {
+                    table.AddCell(timeSheet.Work);
+                    table.AddCell(timeSheet.AssignedBy);
+                    table.AddCell(timeSheet.ReportDate.ToString("dd-MM-yyyy"));
+                    table.AddCell(timeSheet.CurrentDate.ToString("dd-MM-yyyy"));
+                    table.AddCell(timeSheet.RemarksByReOf);
+                    table.AddCell(timeSheet.RemarksByRpOf);
+                }
+
+                document.Add(table);
+
+                // Space for Signatures
+                document.Add(new Paragraph("\n\n"));
+                document.Add(new Paragraph("Reporting Officer Signature: ___________________________"));
+                document.Add(new Paragraph("Reviewing Officer Signature: ___________________________"));
+
+                document.Close();
+
+                return memoryStream.ToArray();
+            }
+        }
     }
-}
+
+
+    
+     }
+
+
+    //public IActionResult ViewReport(string id)
+    //{
+    //    var report = _timeSheetRepository.GetTimeSheetsByEmployeeId(id);
+
+
+    //    if (report == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    //var viewModel = new UserIndexViewModelTS
+    //    //{
+    //    //    CurrentUser = new EditUserViewModelTS(), // You may need to populate this if needed
+    //    //    AllUsersWithRoles = new List<EditUserViewModelTS>(), // You may need to populate this if needed
+    //    //    employeeWithRoles = new List<EmployeeWithRole>(), // You may need to populate this if needed
+    //    //    TimeSheet = (TimeSheet)report, // Set the TimeSheet property to the fetched report
+    //    //    TimeSheets = new List<TimeSheet> { TimeSheet } // You may need to adjust this if you're passing multiple time sheets
+    //    //};
+
+    //    var viewModel = new UserIndexViewModelTS
+    //    {
+    //        TimeSheets = report,
+    //       // CurrentUser.Id = id,
+
+    //    };
+
+    //    viewModel.CurrentUser = new EditUserViewModelTS
+    //    {
+    //        Id = id
+    //    };
+
+    //    return View(viewModel);
+    //}
+
+
+

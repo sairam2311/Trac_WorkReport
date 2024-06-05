@@ -1,0 +1,44 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@using WorkReport.Models.Models;
+@model UserIndexViewModelTS
+
+@{
+    ViewData["Title"] = "View Report";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Report Details</h4>
+                </div>
+                 @foreach (var emp in Model.TimeSheets.OrderBy(p => p.ReportDate))
+                    {
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Report ID:</label>
+                        <p class="form-text">@emp.Work</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Report Date:</label>
+                        <p class="form-text">@emp.CurrentDate.ToString("dd-MM-yyyy")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Report Content:</label>
+                        <p class="form-text">@emp.ReportDate</p>
+                    </div>
+                    <!-- Add more fields as needed -->
+                </div>
+                }
+            </div>
+        </div>
+       
+    </div>
+</div>
+
