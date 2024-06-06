@@ -247,7 +247,7 @@
                                 <td>@emp.CurrentDate.ToString("dd-MM-yyyy")</td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                        <a asp-controller="TS" asp-action="ViewReport" asp-route-id="@emp.Id" class="btn btn-primary">
+                                        <a asp-controller="TS" asp-action="ViewReport" asp-route-id="@emp.EmployeeGUID" class="btn btn-primary">
                                                 <i class="bi bi-pencil-square"></i> View Report
                                             </a>
                                     <a asp-controller="Projects" asp-action="Delete" asp-route-id="@emp.TSid" class="btn btn-danger">
