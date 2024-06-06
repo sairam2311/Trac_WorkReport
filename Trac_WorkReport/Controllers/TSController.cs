@@ -610,6 +610,13 @@ using iText.Layout.Properties;
 
 using System.IO;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using iText.Kernel.Colors;
+using iText.Kernel.Geom;
+using iText.Layout.Borders;
+using iText.IO.Image;
+using iText.Kernel.Pdf.Canvas.Draw;
+using iText.Kernel.Pdf.Canvas;
+using iText.Kernel.Pdf.Extgstate;
 
 namespace Trac_WorkReport.Controllers
 {
@@ -858,39 +865,6 @@ namespace Trac_WorkReport.Controllers
             return View(model);
         }
 
-
-        [HttpPost]
-        public IActionResult DownloadReport(string userId, DateTime? startDate, DateTime? endDate)
-        {
-            var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(userId);
-
-            if (startDate.HasValue && endDate.HasValue)
-            {
-                reports = reports
-                    .Where(t => t.ReportDate >= startDate && t.ReportDate <= endDate)
-                    .ToList();
-            }
-
-            // var csv = GenerateCsv(reports);
-
-            // var bytes = Encoding.UTF8.GetBytes(csv);
-
-
-            //var output = new FileContentResult(bytes, "text/csv")
-            //{
-            //    FileDownloadName = $"Report_{DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture)}.csv"
-            //};
-            var user = _userManager.FindByIdAsync(userId).Result;
-
-            var pdfBytes = GeneratePdf(user, reports);
-            // var pdfBytes = GeneratePdf(reports);
-            var output = new FileContentResult(pdfBytes, "application/pdf")
-            {
-                FileDownloadName = $"Report_{DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture)}.pdf"
-            };
-            return output;
-        }
-
         private string GenerateCsv(IEnumerable<TimeSheet> timeSheets)
         {
             var csv = new StringBuilder();
@@ -904,64 +878,403 @@ namespace Trac_WorkReport.Controllers
             return csv.ToString();
         }
 
+        [HttpPost]
+        public IActionResult DownloadReport(string userId, DateTime? startDate, DateTime? endDate)
+        {
+            try
+            {
+                var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(userId);
 
-        private byte[] GeneratePdf(ApplicationUser currentUser, IEnumerable<TimeSheet> timeSheets)
+                if (startDate.HasValue && endDate.HasValue)
+                {
+                    reports = reports
+                        .Where(t => t.ReportDate >= startDate && t.ReportDate <= endDate)
+                        .ToList();
+                }
+
+                var user = _userManager.FindByIdAsync(userId).Result;
+
+                // Retrieve the reporting and reviewing officer names
+                var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(user.Id);
+                var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(user.Id);
+
+                // Map ApplicationUser to EditUserViewModelTS and include officer names
+                var editUserViewModel = new EditUserViewModelTS
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    EmployeeName = user.EmployeeName,
+                    EmployeeID = user.EmployeeID,
+                    ReportingOfficerName = reportingOfficerName,
+                    ReviewingofficerName = reviewingOfficerName,
+                   
+                };
+
+                var pdfBytes = GeneratePdf(editUserViewModel, reports);
+
+                var output = new FileContentResult(pdfBytes, "application/pdf")
+                {
+                    FileDownloadName = $"Report_{DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture)}.pdf"
+                };
+                return output;
+            }
+            catch (Exception ex)
+            {
+                // Log the error (you could use a logging framework here)
+                // For now, return a simple error message
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        public byte[] GeneratePdf(EditUserViewModelTS currentUser, IEnumerable<TimeSheet> timeSheets)
         {
             using (var memoryStream = new MemoryStream())
             {
                 var writer = new PdfWriter(memoryStream);
                 var pdf = new PdfDocument(writer);
-                var document = new Document(pdf);
+                var document = new Document(pdf, PageSize.A4.Rotate());
 
-                // Header with User Details
-                document.Add(new Paragraph("User Details"));
-                document.Add(new Paragraph($"Employee Name: {currentUser.EmployeeName}"));
-                document.Add(new Paragraph($"Employee ID: {currentUser.EmployeeID}"));
-                document.Add(new Paragraph($"Reporting Officer: {currentUser.PhoneNumber}"));
-                document.Add(new Paragraph($"Reviewing Officer: {currentUser.Id}"));
-                document.Add(new Paragraph("\n"));
 
-                var columnWidths = new float[] { 16.67f, 16.67f, 16.67f, 16.67f, 16.67f, 16.67f }; // Six columns with equal width
-                var table = new iText.Layout.Element.Table(UnitValue.CreatePercentArray(columnWidths)).UseAllAvailableWidth();
+                var logoPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.png");
+                // Add watermark to each page
+               
 
-                // var table = new iText.Layout.Element.Table(UnitValue.CreatePercentArray(6)).UseAllAvailableWidth();
+                SetPageMargins(document); // Set page margins
+                AddHeader(document);
+                //AddTitle(document, "Time Sheet Report");
+                AddUserDetails(document, currentUser);
+                AddTimeSheetDetails(document, timeSheets);
+                AddSignatures(document, currentUser.ReportingOfficerName, currentUser.ReviewingofficerName);
 
-                // Header Row
-                table.AddHeaderCell("Work");
-                table.AddHeaderCell("Assigned By");
-                table.AddHeaderCell("Report Date");
-                table.AddHeaderCell("Uploaded Date");
-                table.AddHeaderCell("Remarks by Reviewing Officer");
-                table.AddHeaderCell("Remarks by Reporting Officer");
-
-                // Data Rows
-                foreach (var timeSheet in timeSheets)
-                {
-                    table.AddCell(timeSheet.Work);
-                    table.AddCell(timeSheet.AssignedBy);
-                    table.AddCell(timeSheet.ReportDate.ToString("dd-MM-yyyy"));
-                    table.AddCell(timeSheet.CurrentDate.ToString("dd-MM-yyyy"));
-                    table.AddCell(timeSheet.RemarksByReOf);
-                    table.AddCell(timeSheet.RemarksByRpOf);
-                }
-
-                document.Add(table);
-
-                // Space for Signatures
-                document.Add(new Paragraph("\n\n"));
-                document.Add(new Paragraph("Reporting Officer Signature: ___________________________"));
-                document.Add(new Paragraph("Reviewing Officer Signature: ___________________________"));
+                AddWatermark(pdf, logoPath);
 
                 document.Close();
 
                 return memoryStream.ToArray();
             }
         }
+
+        private void AddWatermark(PdfDocument pdf, string imagePath)
+        {
+            ImageData imageData = ImageDataFactory.Create(imagePath);
+            float width = pdf.GetDefaultPageSize().GetWidth();
+            float height = pdf.GetDefaultPageSize().GetHeight();
+            float x = (width - imageData.GetWidth()) / 2;
+            float y = (height - imageData.GetHeight()) / 2;
+
+            for (int i = 1; i <= pdf.GetNumberOfPages(); i++)
+            {
+                PdfPage page = pdf.GetPage(i);
+                PdfCanvas canvas = new PdfCanvas(page);
+                canvas.SaveState();
+                canvas.SetExtGState(new PdfExtGState().SetFillOpacity(0.2f));
+
+                // Scale and position the image to cover the full page
+                // canvas.AddImageFittedIntoRectangle(imageData, new iText.Kernel.Geom.Rectangle(0, 0, width, height), true);
+
+               // canvas.AddImage(imageData, 50, 50, width, false);
+
+                //canvas.RestoreState();
+                 canvas.AddImage(imageData, imageData.GetWidth(), 50, 50, imageData.GetHeight(), x, y, true);
+                //canvas.RestoreState();
+            }
+        }
+
+        private void SetPageMargins(Document document)
+        {
+            // Set page margins (e.g., 36 points on all sides)
+            document.SetMargins(36, 36, 36, 36);
+        }
+
+
+
+        private void AddHeader(Document document)
+        {
+            // Get the available width of the page
+            var pageWidth = document.GetPdfDocument().GetDefaultPageSize().GetWidth();
+
+            // Adjust logo size based on available width (e.g., 20% of the page width)
+            var logoWidth = pageWidth * 0.05f;
+
+            var logoPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.png");
+            var logo = ImageDataFactory.Create(logoPath);
+            //var img = new Image(logo).SetWidth(logoWidth).SetMarginBottom(10).SetHorizontalAlignment(HorizontalAlignment.LEFT);
+            var img = new Image(logo).SetWidth(logoWidth).SetHorizontalAlignment(HorizontalAlignment.CENTER);
+
+            // document.Add(img);
+            // document.Add(new Paragraph().SetMarginBottom(5)); // Add some space after the logo
+
+            // Add company name and details
+            var companyName = "Telangana Remote Sensing Applications Centre (TGRAC)";
+            var companyDetails = "Address: XXXXXXXXXXXXXXXXXXX\nPhone: XXXXXXXXXXXXXXX\nEmail: XXXXXXXXXXXXXXXXXl";
+            var companyInfo = new Paragraph()
+                .Add(new Text(companyName).SetBold().SetFontSize(14)).Add("\n")
+                .Add(companyDetails).SetFontSize(10);
+
+            // Create a table for the header with two rows: logo and company information
+            var headerTable = new iText.Layout.Element.Table(new float[] { pageWidth }).UseAllAvailableWidth();
+            headerTable.AddCell(new Cell().Add(img).SetBorder(Border.NO_BORDER).SetHorizontalAlignment(HorizontalAlignment.CENTER));
+            headerTable.AddCell(new Cell().Add(companyInfo).SetBorder(Border.NO_BORDER).SetTextAlignment(TextAlignment.CENTER));
+
+            document.Add(headerTable);
+            // Add a line after the company details
+            var line = new LineSeparator(new SolidLine()).SetMarginTop(10).SetMarginBottom(10);
+            document.Add(line);
+            document.Add(new Paragraph().SetMarginBottom(20)); // Add some space after the header
+        }
+
+        private void AddTitle(Document document, string titleText)
+        {
+            var title = new Paragraph(titleText)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetFontSize(24)
+                .SetBold()
+                .SetFontColor(ColorConstants.BLUE)
+                .SetMarginBottom(20)
+                .SetBorder(new SolidBorder(1));
+            document.Add(title);
+        }
+
+        //private void AddUserDetails(Document document, EditUserViewModelTS currentUser)
+        //{
+        //    var userDetailsTitle = new Paragraph("User Details")
+        //        .SetBold()
+        //        .SetFontSize(16)
+        //        .SetMarginBottom(10);
+        //    document.Add(userDetailsTitle);
+
+        //    var table = new iText.Layout.Element.Table(new float[] { 2, 5 }).UseAllAvailableWidth();
+
+        //   // table.AddHeaderCell(CreateHeaderCell("Field"));
+        //   // table.AddHeaderCell(CreateHeaderCell("Value"));
+
+        //    table.AddCell(CreateCell("Employee Name: { currentUser.EmployeeName}")).AddCell(CreateCell(currentUser.EmployeeName));
+        //    table.AddCell(CreateCell("Employee ID:")).AddCell(CreateCell(currentUser.EmployeeID));
+        //    table.AddCell(CreateCell("Reporting Officer:")).AddCell(CreateCell(currentUser.ReportingOfficerName));
+        //    table.AddCell(CreateCell("Reviewing Officer:")).AddCell(CreateCell(currentUser.ReviewingofficerName));
+
+        //    document.Add(table);
+        //}
+
+        private void AddUserDetails(Document document, EditUserViewModelTS currentUser)
+        {
+            //var userDetailsTitle = new Paragraph("User Details")
+            //    .SetBold()
+            //    .SetFontSize(16)
+            //    .SetMarginBottom(10);
+            //document.Add(userDetailsTitle);
+
+            var tabStops = new TabStop[] {
+        new TabStop(300, TabAlignment.LEFT), // Set tab stop at 300 points
+    };
+
+            var employeeNameAndId = new Paragraph()
+                .AddTabStops(tabStops)
+                .Add(new Text("Employee Name: ").SetBold().SetFontSize(12).SetFontColor(ColorConstants.BLUE))
+                .Add(currentUser.EmployeeName).SetFontSize(10)
+                .Add(new Tab())
+                .Add(new Text("Employee ID: ").SetBold().SetFontSize(12).SetFontColor(ColorConstants.BLUE))
+                .Add(currentUser.EmployeeID).SetFontSize(10);
+
+            document.Add(employeeNameAndId);
+
+            // Add reporting officer and reviewing officer details if needed
+            //if (!string.IsNullOrEmpty(currentUser.ReportingOfficerName) && !string.IsNullOrEmpty(currentUser.ReviewingofficerName))
+            //{
+            //    var reportingAndReviewing = new Paragraph()
+            //        .AddTabStops(tabStops)
+            //        .Add(new Text("Reporting Officer: ").SetBold())
+            //        .Add(currentUser.ReportingOfficerName)
+            //        .Add(new Tab())
+            //        .Add(new Text("Reviewing Officer: ").SetBold())
+            //        .Add(currentUser.ReviewingofficerName);
+
+            //    document.Add(reportingAndReviewing);
+            //}
+        }
+
+
+        private void AddTimeSheetDetails(Document document, IEnumerable<TimeSheet> timeSheets)
+        {
+            var timeSheetTitle = new Paragraph("Time Sheets")
+                .SetBold()
+                .SetFontSize(12)
+                .SetMarginTop(20)
+                .SetMarginBottom(10); 
+           // .SetMarginRight(50);
+            document.Add(timeSheetTitle);
+
+            var table = new iText.Layout.Element.Table(new float[] { 1, 1, 6 }).UseAllAvailableWidth();
+
+            table.AddHeaderCell(CreateHeaderCell("S.No"));
+            table.AddHeaderCell(CreateHeaderCell("Date"));
+            table.AddHeaderCell(CreateHeaderCell("Details"));
+
+            int serialNumber = 1;
+
+            foreach (var timeSheet in timeSheets)
+            {
+                table.AddCell(CreateCell(serialNumber.ToString(), TextAlignment.LEFT));
+                table.AddCell(CreateCell(timeSheet.ReportDate.ToString("dd-MM-yyyy"), TextAlignment.CENTER));
+
+                //var workDetails = new StringBuilder($"Work: \n{timeSheet.Work}\n\n");
+                //workDetails.Append(!string.IsNullOrEmpty(timeSheet.RemarksByRpOf)
+                //    ? $"\nReporting Officer Remarks:\n {timeSheet.RemarksByRpOf}\n<hr>"
+                //    : $"\nReporting Officer Remarks:\n [No remarks provided]\n");
+                //workDetails.Append(!string.IsNullOrEmpty(timeSheet.RemarksByReOf)
+                //    ? $"\nReviewing Officer Remarks:\n {timeSheet.RemarksByReOf}\n"
+                //    : $"\nReviewing Officer Remarks:\n [No remarks provided]\n");
+
+                var workDetails = new StringBuilder();
+                workDetails.AppendLine($"Work: \n{timeSheet.Work}\n");
+                // Add a line separator after Work
+                // workDetails.AppendLine(new LineSeparator(new SolidLine()).SetMarginTop(5).SetMarginBottom(5).ToString());
+                //workDetails.AppendLine(new LineSeparator(new SolidLine()).ToString());
+
+                workDetails.AppendLine($"------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+                if (!string.IsNullOrEmpty(timeSheet.RemarksByRpOf))
+                {
+                    workDetails.AppendLine("Reporting Officer Remarks:");
+                    workDetails.AppendLine($"{timeSheet.RemarksByRpOf}");
+                    workDetails.AppendLine($"------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                }
+                else
+                {
+                    workDetails.AppendLine("Reporting Officer Remarks:");
+                    workDetails.AppendLine("[No remarks provided]");
+                    workDetails.AppendLine($"------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                }
+
+                if (!string.IsNullOrEmpty(timeSheet.RemarksByReOf))
+                {
+                    workDetails.AppendLine("Reviewing Officer Remarks:\n");
+                    workDetails.AppendLine($"{timeSheet.RemarksByReOf}");
+                    workDetails.AppendLine($"------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                }
+                else
+                {
+                    workDetails.AppendLine("Reviewing Officer Remarks:\n");
+                    workDetails.AppendLine("[No remarks provided]");
+                    workDetails.AppendLine($"------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                }
+
+                // Convert StringBuilder to string
+                var workDetailsString = workDetails.ToString();
+
+                table.AddCell(CreateCell(workDetails.ToString().TrimEnd('\n'), TextAlignment.LEFT));
+                serialNumber++;
+            }
+
+            document.Add(table);
+        }
+
+        private Cell CreateHeaderCell(string text)
+        {
+            return new Cell().Add(new Paragraph(text).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetTextAlignment(TextAlignment.CENTER).SetPadding(5));
+        }
+
+        private Cell CreateCell(string text, TextAlignment alignment = TextAlignment.LEFT, bool bold = false)
+        {
+            var paragraph = new Paragraph().SetTextAlignment(alignment).SetPadding(5);
+            if (bold)
+            {
+                paragraph.Add(new Text(text.Substring(0, text.IndexOf(':') + 1)).SetBold());
+                paragraph.Add(new Text(text.Substring(text.IndexOf(':') + 1)));
+            }
+            else
+            {
+                paragraph.Add(text);
+            }
+            return new Cell().Add(paragraph).SetPadding(5);
+        }
+
+        private void AddSignatures(Document document, string reportingOfficerName, string reviewingOfficerName)
+        {
+            var signatureTitle = new Paragraph("Signatures")
+                .SetBold()
+                .SetFontSize(16)
+                .SetMarginTop(20)
+                .SetMarginBottom(10);
+            document.Add(signatureTitle);
+
+            var table = new iText.Layout.Element.Table(new float[] { 1, 1 }).UseAllAvailableWidth();
+
+            table.AddCell(new Cell().Add(new Paragraph($"Reporting Officer: {reportingOfficerName}\n\n")
+                .SetFontSize(12).SetTextAlignment(TextAlignment.LEFT))
+                .Add(new Paragraph("Reporting Officer Signature: ___________________________")
+                .SetFontSize(12))
+                .SetBorder(Border.NO_BORDER));
+
+            table.AddCell(new Cell().Add(new Paragraph($"Reviewing Officer: {reviewingOfficerName}\n\n")
+                .SetFontSize(12).SetTextAlignment(TextAlignment.LEFT))
+                .Add(new Paragraph("Reviewing Officer Signature: ___________________________")
+                .SetFontSize(12))
+                .SetBorder(Border.NO_BORDER));
+
+            document.Add(table);
+        }
+
+
+
+
+
+        //private byte[] GeneratePdf(ApplicationUser currentUser, IEnumerable<TimeSheet> timeSheets)
+        //{
+        //    using (var memoryStream = new MemoryStream())
+        //    {
+        //        var writer = new PdfWriter(memoryStream);
+        //        var pdf = new PdfDocument(writer);
+        //        var document = new Document(pdf);
+
+        //        // Header with User Details
+        //        document.Add(new Paragraph("User Details"));
+        //        document.Add(new Paragraph($"Employee Name: {currentUser.EmployeeName}"));
+        //        document.Add(new Paragraph($"Employee ID: {currentUser.EmployeeID}"));
+        //        document.Add(new Paragraph($"Reporting Officer: {currentUser.PhoneNumber}"));
+        //        document.Add(new Paragraph($"Reviewing Officer: {currentUser.Id}"));
+        //        document.Add(new Paragraph("\n"));
+
+        //        var columnWidths = new float[] { 16.67f, 16.67f, 16.67f, 16.67f, 16.67f, 16.67f }; // Six columns with equal width
+        //        var table = new iText.Layout.Element.Table(UnitValue.CreatePercentArray(columnWidths)).UseAllAvailableWidth();
+
+        //        // var table = new iText.Layout.Element.Table(UnitValue.CreatePercentArray(6)).UseAllAvailableWidth();
+
+        //        // Header Row
+        //        table.AddHeaderCell("Work");
+        //        table.AddHeaderCell("Assigned By");
+        //        table.AddHeaderCell("Report Date");
+        //        table.AddHeaderCell("Uploaded Date");
+        //        table.AddHeaderCell("Remarks by Reviewing Officer");
+        //        table.AddHeaderCell("Remarks by Reporting Officer");
+
+        //        // Data Rows
+        //        foreach (var timeSheet in timeSheets)
+        //        {
+        //            table.AddCell(timeSheet.Work);
+        //            table.AddCell(timeSheet.AssignedBy);
+        //            table.AddCell(timeSheet.ReportDate.ToString("dd-MM-yyyy"));
+        //            table.AddCell(timeSheet.CurrentDate.ToString("dd-MM-yyyy"));
+        //            table.AddCell(timeSheet.RemarksByReOf);
+        //            table.AddCell(timeSheet.RemarksByRpOf);
+        //        }
+
+        //        document.Add(table);
+
+        //        // Space for Signatures
+        //        document.Add(new Paragraph("\n\n"));
+        //        document.Add(new Paragraph("Reporting Officer Signature: ___________________________"));
+        //        document.Add(new Paragraph("Reviewing Officer Signature: ___________________________"));
+
+        //        document.Close();
+
+        //        return memoryStream.ToArray();
+        //    }
+        //}
     }
 
 
-    
-     }
+
+}
 
 
     //public IActionResult ViewReport(string id)
