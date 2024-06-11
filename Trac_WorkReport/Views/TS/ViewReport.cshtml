@@ -166,6 +166,7 @@
                                         <th>Uploaded Date</th>
                                         <th>Remarks by Reviewing Officer</th>
                                         <th>Remarks by Reporting Officer</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -178,6 +179,16 @@
                                             <td>@emp.CurrentDate.ToString("dd-MM-yyyy")</td>
                                             <td>@emp.RemarksByReOf</td>
                                             <td>@emp.RemarksByRpOf</td>
+                                            <td>
+                                                <div class="w-50 btn-group" role="group">
+                                                    <a asp-controller="TS" asp-action="UpdateTS" asp-route-id="@emp.TSid" class="mx-1">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </a>
+                                                   @* <a asp-controller="Designation" asp-action="Delete" asp-route-id="@obj.DesId" class="mx-1">
+                                                        <i class="bi bi-archive-fill"></i>
+                                                    </a>*@
+                                                </div>
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>

@@ -59,8 +59,12 @@ namespace WorkReport.Models.Models
             [ValidateNever]
             public string EmployeeGUID { get; set; }
 
-            [Required(ErrorMessage = "Work details are required")]
-            public string Work { get; set; }
+       
+        [Required(ErrorMessage = "Work Title required")]
+        public string WorkTitle { get; set; }
+
+        [ValidateNever]
+        public string Work { get; set; }
 
             [ValidateNever]
             public string AssignedBy { get; set; }

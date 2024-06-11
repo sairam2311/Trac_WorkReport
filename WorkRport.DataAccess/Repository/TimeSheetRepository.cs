@@ -37,5 +37,10 @@ namespace WorkRport.DataAccess.Repository
             return _db.timeSheets.Where(t => t.EmployeeGUID == employeeId).ToList();
         }
 
+        public IEnumerable<TimeSheet> GetTimeSheetsById(Guid Tsid)
+        {
+            return _db.timeSheets.Where(t => t.TSid == Tsid).ToList();
+        }
+
     }
 }

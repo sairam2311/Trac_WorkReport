@@ -16,5 +16,7 @@ namespace WorkRport.DataAccess.Repository.IRepository
         void save();
 
         IEnumerable<TimeSheet> GetTimeSheetsByEmployeeId(string employeeId);
+
+        IEnumerable<TimeSheet> GetTimeSheetsById(Guid Tsid);
     }
 }

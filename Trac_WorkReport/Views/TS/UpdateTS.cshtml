@@ -1,0 +1,167 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@using WorkReport.Models.Models
+@model UserIndexViewModelTS
+
+@{
+    // Convert UTC +5:30 to local time
+    var localDate = DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("dd/MM/yyyy");
+}
+
+<form asp-action="UpdateTS" method="post">
+    <!-- User Information Section -->
+   @* <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title">User Information</h5>
+                <hr>
+                @* //<input id="" asp-for="@Model.CurrentUser.Id" hidden  />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" value="@Model.CurrentUser.EmployeeName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeID">Employee ID</label>
+                            <input type="text" class="form-control" id="employeeID" value="@Model.CurrentUser.EmployeeID" readonly>
+                        </div>
+                    </div>
+
+
+    <div class="form-group">
+    <label asp-for="TimeSheet.Work">Work </label>
+    <div class="input-group">
+    <textarea class="form-control" rows="3" asp-for="TimeSheet.Work" placeholder="Select Date" readonly value="@timeSheet.Work"></textarea>
+    <input type="text" class="form-control" asp-for="TimeSheet.Work" readonly value="@timeSheet.Work">
+    </div>
+    </div>
+
+
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="reportingOfficer">Reporting Officer</label>
+                            <input type="text" class="form-control" id="reportingOfficer" value="@Model.CurrentUser.ReportingOfficerName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="designation">Designation</label>
+                            <input type="text" class="form-control" id="designation" value="@Model.CurrentUser.Roles.FirstOrDefault()?.RoleName" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+    <!-- Project Addition Form -->
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Add Work</h5>
+                <hr>
+
+                @foreach (var reportViewModel in Model.reportViewModels)
+                {
+                    @foreach (var timeSheet in reportViewModel.TimeSheets)
+                    {
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.WorkTitle">Work Title</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="TimeSheet.WorkTitle" readonly value="@timeSheet.WorkTitle">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.ReportDate">Report Date</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="TimeSheet.ReportDate" readonly value="@timeSheet.ReportDate">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.Work">Work</label>
+                            <div class="input-group">
+                                <textarea class="form-control" rows="3" readonly>@timeSheet.Work</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.RemarksByRpOf">Remarks by Reporting Officer</label>
+                            <div class="input-group">
+                                <textarea class="form-control" rows="3" readonly>@timeSheet.RemarksByRpOf</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.RemarksByReOf">Remarks by Reviewing Officer</label>
+                            <div class="input-group">
+                                <textarea class="form-control" rows="6" readonly>@timeSheet.RemarksByReOf</textarea>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+
+   @* <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Add Work</h5>
+                <hr>
+
+                @foreach (var reportViewModel in Model.reportViewModels)
+                {
+                    @foreach (var timeSheet in reportViewModel.TimeSheets)
+                    {
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.WorkTitle">Work Title</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="TimeSheet.WorkTitle" readonly value="@timeSheet.WorkTitle">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.ReportDate">Report Date</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" asp-for="TimeSheet.ReportDate" readonly value="@timeSheet.ReportDate">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.Work">Work</label>
+                            <div class="input-group">
+                                <textarea class="form-control" rows="3" readonly>@timeSheet.Work</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.RemarksByRpOf">Remarks by Reporting Officer</label>
+                            <textarea class="form-control" rows="3" readonly>@timeSheet.RemarksByRpOf</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TimeSheet.RemarksByReOf">Remarks by Reviewing Officer</label>
+                            <textarea class="form-control" rows="6" readonly>@timeSheet.RemarksByReOf</textarea>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>*@
+
+
+
+
+
+</form>
+
+@section Scripts {
+   
+}

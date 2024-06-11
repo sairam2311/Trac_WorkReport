@@ -602,6 +602,7 @@ using WorkReport.Models.Models;
 using System.Globalization;
 using System.Text;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Cryptography;
 
 using iText.Kernel.Pdf;
 using iText.Layout;
@@ -617,6 +618,10 @@ using iText.IO.Image;
 using iText.Kernel.Pdf.Canvas.Draw;
 using iText.Kernel.Pdf.Canvas;
 using iText.Kernel.Pdf.Extgstate;
+using iText.Kernel.Font;
+using iText.Layout.Element;
+
+
 
 namespace Trac_WorkReport.Controllers
 {
@@ -776,6 +781,7 @@ namespace Trac_WorkReport.Controllers
                 {
                     EmployeeGUID = currentUser.Id,
                     Work = model.TimeSheet.Work,
+                    WorkTitle = model.TimeSheet.WorkTitle,
                     AssignedBy = "Self Reporting",
                     //CurrentDate = model.TimeSheet.CurrentDate.Date,
                     RemarksByReOf = model.TimeSheet.RemarksByReOf,
@@ -828,11 +834,125 @@ namespace Trac_WorkReport.Controllers
         }
 
 
+        public async Task<IActionResult> AssignWork()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+            var allUsers = _userManager.Users.ToList();
+            var allUsersWithRoles = new List<EditUserViewModelTS>();
+
+            foreach (var user in allUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                allUsersWithRoles.Add(new EditUserViewModelTS
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    EmployeeID = user.EmployeeID,
+                    EmployeeName = user.EmployeeName,
+                    Roles = roles.Select(r => new RoleViewModelTS
+                    {
+                        RoleName = r,
+                        IsSelected = true
+                    }).ToList()
+                });
+            }
+
+            var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(currentUser.Id);
+            var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(currentUser.Id);
+
+            var model = new UserIndexViewModelTS
+            {
+                CurrentUser = new EditUserViewModelTS
+                {
+                    Id = currentUser.Id,
+                    Email = currentUser.Email,
+                    EmployeeID = currentUser.EmployeeID,
+                    EmployeeName = currentUser.EmployeeName,
+                    ReportingOfficerName = reportingOfficerName,
+                    ReviewingofficerName = reviewingOfficerName,
+                    Roles = currentUserRoles.Select(r => new RoleViewModelTS
+                    {
+                        RoleName = r,
+                        IsSelected = true
+                    }).ToList()
+                },
+                AllUsersWithRoles = allUsersWithRoles,
+                TimeSheet = new TimeSheet() // Initialize TimeSheet object
+            };
+
+            return View(model);
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> AssignWork(string Id, UserIndexViewModelTS model)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (ModelState.IsValid)
+            {
+                // var timeSheet = model.TimeSheet;
+
+                var timeSheet = new TimeSheet
+                {
+                    EmployeeGUID = Id,
+                    Work = model.TimeSheet.Work,
+                    AssignedBy = currentUser.Id,
+                    WorkTitle = model.TimeSheet.WorkTitle,
+                    //CurrentDate = model.TimeSheet.CurrentDate.Date,
+                    RemarksByReOf = model.TimeSheet.RemarksByReOf,
+                    RemarksByRpOf = model.TimeSheet.RemarksByRpOf,
+                    // Adjust for UTC +5:30
+                    ReportDate = DateTime.SpecifyKind(model.TimeSheet.ReportDate, DateTimeKind.Utc)
+                    //.AddHours(5).AddMinutes(30)
+
+                    //ReportDate = DateTime.SpecifyKind(model.TimeSheet.ReportDate, DateTimeKind.Utc), // Ensure ReportDate is UTC
+                    //ReportDate = model.TimeSheet.ReportDate.Date
+
+
+                };
+                _timeSheetRepository.Add(timeSheet);
+                _timeSheetRepository.save();
+                return RedirectToAction(nameof(Index));
+            }
+
+
+            var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+            var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(currentUser.Id);
+            var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(currentUser.Id);
+
+            model.CurrentUser = new EditUserViewModelTS
+            {
+                Id = currentUser.Id,
+                Email = currentUser.Email,
+                EmployeeID = currentUser.EmployeeID,
+                EmployeeName = currentUser.EmployeeName,
+                ReportingOfficerName = reportingOfficerName,
+                ReviewingofficerName = reviewingOfficerName,
+                Roles = currentUserRoles.Select(r => new RoleViewModelTS
+                {
+                    RoleName = r,
+                    IsSelected = true
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+
         [HttpGet]
-        public IActionResult ViewReport(string id)
+        public async Task<IActionResult>  ViewReport(string id)
         {
             var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(id);
 
+            
             var viewModel = new UserIndexViewModelTS
             {
                 reportViewModels = new List<ViewReportViewModel>
@@ -842,16 +962,69 @@ namespace Trac_WorkReport.Controllers
                     UserId = id,
                     TimeSheets = reports
                 }
+
             }
+
+               
             };
+
+            //model.reportViewModels.First().TimeSheets = reports;
+            var timeSheetViewModels = new List<TimeSheet>();
+
+            foreach (var report in reports)
+            {
+                var assignedByName = report.AssignedBy;
+
+                if (report.AssignedBy != "Self Reporting")
+                {
+                    var user = await _userManager.FindByIdAsync(report.AssignedBy);
+
+                    assignedByName = user?.EmployeeName ?? "Unknown"; // Ensure there's a fallback if user is not found
+
+                }
+                // Check if AssignedBy matches Reporting Officer or Reviewing Officer
+
+                //else
+                //{
+                //    assignedByName
+                //}
+
+                timeSheetViewModels.Add(new TimeSheet
+                {
+                    TSid = report.TSid,
+                    Work = report.Work,
+                    AssignedBy = assignedByName, // Still store the ID for potential use
+                    //AssignedByName = assignedByName, // This is now the name or "Self Reporting"
+                    ReportDate = report.ReportDate,
+                    CurrentDate = report.CurrentDate,
+                    RemarksByReOf = report.RemarksByReOf,
+                    RemarksByRpOf = report.RemarksByRpOf
+                });
+            }
+
+            viewModel.reportViewModels.First().TimeSheets = timeSheetViewModels;
+
+            //return View(model);
 
             return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult ViewReport(UserIndexViewModelTS model)
+        public async Task<IActionResult> ViewReport(UserIndexViewModelTS model)
         {
-            var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(model.reportViewModels.First().UserId);
+            //var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(model.reportViewModels.First().UserId);
+
+            //if (model.reportViewModels.First().StartDate.HasValue && model.reportViewModels.First().EndDate.HasValue)
+            //{
+            //    reports = reports
+            //        .Where(t => t.ReportDate >= model.reportViewModels.First().StartDate && t.ReportDate <= model.reportViewModels.First().EndDate)
+            //        .ToList();
+            //}
+
+           
+
+            var userId = model.reportViewModels.First().UserId;
+            var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(userId);
 
             if (model.reportViewModels.First().StartDate.HasValue && model.reportViewModels.First().EndDate.HasValue)
             {
@@ -860,8 +1033,136 @@ namespace Trac_WorkReport.Controllers
                     .ToList();
             }
 
-            model.reportViewModels.First().TimeSheets = reports;
+           
 
+
+            //model.reportViewModels.First().TimeSheets = reports;
+            var timeSheetViewModels = new List<TimeSheet>();
+
+            foreach (var report in reports)
+            {
+                var assignedByName = report.AssignedBy;
+
+                if (report.AssignedBy != "Self Reporting")
+                {
+                    var user = await _userManager.FindByIdAsync(report.AssignedBy);
+                  
+                    assignedByName = user?.EmployeeName ?? "Unknown"; // Ensure there's a fallback if user is not found
+
+                }
+                // Check if AssignedBy matches Reporting Officer or Reviewing Officer
+             
+                //else
+                //{
+                //    assignedByName
+                //}
+
+                timeSheetViewModels.Add(new TimeSheet
+                {
+                    TSid = report.TSid,
+                    Work = report.Work,
+                    AssignedBy = assignedByName, // Still store the ID for potential use
+                    //AssignedByName = assignedByName, // This is now the name or "Self Reporting"
+                    ReportDate = report.ReportDate,
+                    CurrentDate = report.CurrentDate,
+                    RemarksByReOf = report.RemarksByReOf,
+                    RemarksByRpOf = report.RemarksByRpOf
+                });
+            }
+
+            model.reportViewModels.First().TimeSheets = timeSheetViewModels;
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult UpdateTS(Guid ID)
+        {
+            var timesheet = _timeSheetRepository.GetTimeSheetsById(ID);
+            if (timesheet == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new UserIndexViewModelTS
+            {
+                reportViewModels = new List<ViewReportViewModel>
+        {
+            new ViewReportViewModel
+            {
+                TimeSheets = timesheet
+            }
+        }
+            };
+
+            return View(viewModel);
+        }
+
+    [HttpGet]
+        public IActionResult UpdateTSdummy(Guid ID)
+        {
+            var timesheet = _timeSheetRepository.GetTimeSheetsById(ID);
+            if (timesheet == null)
+            {
+                return NotFound();
+            }
+
+            // Map the timesheet entity to the view model
+           
+
+            //model.reportViewModels.First().TimeSheets = reports;
+            var timeSheetViewModels = new List<TimeSheet>();
+
+            foreach (var report in timesheet)
+            {
+                var assignedByName = report.AssignedBy;
+
+               
+                // Check if AssignedBy matches Reporting Officer or Reviewing Officer
+
+                //else
+                //{
+                //    assignedByName
+                //}
+
+                timeSheetViewModels.Add(new TimeSheet
+                {
+                    TSid = report.TSid,
+                    Work = report.Work,
+                    AssignedBy = assignedByName, // Still store the ID for potential use
+                    //AssignedByName = assignedByName, // This is now the name or "Self Reporting"
+                    ReportDate = report.ReportDate,
+                    CurrentDate = report.CurrentDate,
+                    RemarksByReOf = report.RemarksByReOf,
+                    RemarksByRpOf = report.RemarksByRpOf
+                });
+            }
+
+            // viewModel.reportViewModels.First().TimeSheets = timeSheetViewModels;
+
+            //return View(model);
+
+            var viewModel = new UserIndexViewModelTS
+            {
+                reportViewModels = new List<ViewReportViewModel>
+            {
+                new ViewReportViewModel
+                {
+
+                    TimeSheets = timeSheetViewModels
+                }
+
+            }
+
+
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateTS(string ID, UserIndexViewModelTS model)
+        {
             return View(model);
         }
 
@@ -877,6 +1178,7 @@ namespace Trac_WorkReport.Controllers
 
             return csv.ToString();
         }
+        
 
         [HttpPost]
         public IActionResult DownloadReport(string userId, DateTime? startDate, DateTime? endDate)
@@ -934,7 +1236,7 @@ namespace Trac_WorkReport.Controllers
                 var document = new Document(pdf, PageSize.A4.Rotate());
 
 
-                var logoPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.png");
+                var logoPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.jpeg");
                 // Add watermark to each page
                
 
@@ -945,7 +1247,14 @@ namespace Trac_WorkReport.Controllers
                 AddTimeSheetDetails(document, timeSheets);
                 AddSignatures(document, currentUser.ReportingOfficerName, currentUser.ReviewingofficerName);
 
-                AddWatermark(pdf, logoPath);
+                //  AddWatermark(pdf, logoPath);
+
+
+              //  AddWatermarkImage(pdf, logoPath);
+
+                float op = 0.5F;
+
+               // AddWatermarkText(pdf, "TGRAC", op);
 
                 document.Close();
 
@@ -953,7 +1262,7 @@ namespace Trac_WorkReport.Controllers
             }
         }
 
-        private void AddWatermark(PdfDocument pdf, string imagePath)
+        private void AddWatermark_old(PdfDocument pdf, string imagePath)
         {
             ImageData imageData = ImageDataFactory.Create(imagePath);
             float width = pdf.GetDefaultPageSize().GetWidth();
@@ -974,10 +1283,421 @@ namespace Trac_WorkReport.Controllers
                // canvas.AddImage(imageData, 50, 50, width, false);
 
                 //canvas.RestoreState();
-                 canvas.AddImage(imageData, imageData.GetWidth(), 50, 50, imageData.GetHeight(), x, y, true);
+
+
+
+                 canvas.AddImageWithTransformationMatrix(imageData, imageData.GetWidth(), 50, 50, imageData.GetHeight(), x, y, true);
                 //canvas.RestoreState();
             }
         }
+
+        private void AddWatermarkImage_two(PdfDocument pdf, string imagePath)
+        {
+            try
+            {
+                // Load the image to be used as a watermark
+                ImageData imageData = ImageDataFactory.Create(imagePath);
+
+                float pageWidth = pdf.GetDefaultPageSize().GetWidth();
+                float pageHeight = pdf.GetDefaultPageSize().GetHeight();
+
+                ImageData imageData1 = ImageDataFactory.Create(imagePath);
+                float width1 = pdf.GetDefaultPageSize().GetWidth();
+                float height1 = pdf.GetDefaultPageSize().GetHeight();
+                float x1 = (width1 - imageData1.GetWidth()) / 2;
+                float y1 = (height1 - imageData1.GetHeight()) / 2;
+
+                for (int i = 1; i <= pdf.GetNumberOfPages(); i++)
+                {
+                    PdfPage page = pdf.GetPage(i);
+
+                    if (page == null || page.GetPdfObject() == null)
+                    {
+                        Console.WriteLine($"Skipping invalid page: {i}");
+                        continue;
+                    }
+
+                    int rotation = 0;
+
+                    try
+                    {
+                        rotation = page.GetRotation();
+                        //continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error getting rotation for page {i}: {ex.Message}");
+                        continue;
+                    }
+
+                    float effectiveWidth = pageWidth;
+                    float effectiveHeight = pageHeight;
+
+                    if (rotation == 90 || rotation == 270)
+                    {
+                        effectiveWidth = pageHeight;
+                        effectiveHeight = pageWidth;
+                    }
+
+                    PdfCanvas canvas = new PdfCanvas(page);
+                    canvas.SaveState();
+
+                    PdfExtGState gState = new PdfExtGState().SetFillOpacity(0.1f);
+                    canvas.SetExtGState(gState);
+
+                    try
+                    {
+                        float aspectRatio = imageData.GetWidth() / imageData.GetHeight();
+                        float imageWidth = effectiveWidth;
+                        float imageHeight = effectiveWidth / aspectRatio;
+
+                        if (imageHeight > effectiveHeight)
+                        {
+                            imageHeight = effectiveHeight;
+                            imageWidth = effectiveHeight * aspectRatio;
+                        }
+
+                        float x = (effectiveWidth - imageWidth) / 2;
+                        float y = (effectiveHeight - imageHeight) / 2;
+
+                         canvas.AddImageWithTransformationMatrix(imageData, imageWidth, 0, 0, imageHeight, x, y, false);
+
+                       
+
+
+                       // canvas.AddImage(imageData1, width1, 0, 0, imageHeight, x1, y1, false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error adding watermark image on page {i}: {ex.Message}");
+                    }
+
+                    canvas.RestoreState();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in AddWatermark method: {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
+        }
+
+        private void AddWatermarkImage_three(PdfDocument pdf, string imagePath)
+        {
+            try
+            {
+                // Load the image to be used as a watermark
+                ImageData imageData = ImageDataFactory.Create(imagePath);
+
+                // Get the total number of pages
+                int numberOfPages = pdf.GetNumberOfPages();
+                Console.WriteLine($"Total number of pages: {numberOfPages}");
+
+                for (int i = 1; i <= numberOfPages; i++)
+                {
+                    try
+                    {
+                        PdfPage page = pdf.GetPage(i);
+
+                        if (page == null)
+                        {
+                            Console.WriteLine($"Page {i} is null.");
+                            continue;
+                        }
+
+                        if (page.GetPdfObject() == null)
+                        {
+                            Console.WriteLine($"PDF object for page {i} is null.");
+                            continue;
+                        }
+
+                        // Safely check and log page size and rotation
+                        Rectangle pageSize = page.GetPageSize();
+                        if (pageSize == null)
+                        {
+                            Console.WriteLine($"Page size is null for page: {i}");
+                            continue;
+                        }
+
+                        float pageWidth = pageSize.GetWidth();
+                        float pageHeight = pageSize.GetHeight();
+
+                        int rotation = 0;
+                        try
+                        {
+                            rotation = page.GetRotation();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error getting rotation for page {i}: {ex.Message}");
+                            // Setting a default rotation if not available
+                            rotation = 0;
+                        }
+
+                        float effectiveWidth = pageWidth;
+                        float effectiveHeight = pageHeight;
+
+                        // Adjust dimensions if the page is rotated
+                        if (rotation == 90 || rotation == 270)
+                        {
+                            effectiveWidth = pageHeight;
+                            effectiveHeight = pageWidth;
+                        }
+
+                        PdfCanvas canvas = new PdfCanvas(page);
+                        canvas.SaveState();
+
+                        // Set the transparency for the watermark
+                        PdfExtGState gState = new PdfExtGState().SetFillOpacity(0.1f);
+                        canvas.SetExtGState(gState);
+
+                        // Maintain the aspect ratio of the image
+                        float aspectRatio = imageData.GetWidth() / imageData.GetHeight();
+                        float imageWidth = effectiveWidth;
+                        float imageHeight = effectiveWidth / aspectRatio;
+
+                        if (imageHeight > effectiveHeight)
+                        {
+                            imageHeight = effectiveHeight;
+                            imageWidth = effectiveHeight * aspectRatio;
+                        }
+
+                        // Calculate the position to center the image
+                        float x = (effectiveWidth - imageWidth) / 2;
+                        float y = (effectiveHeight - imageHeight) / 2;
+
+                        // Add the image to the canvas
+                        canvas.AddImageWithTransformationMatrix(imageData, imageWidth, 0, 0, imageHeight, x, y, false);
+
+                        Console.WriteLine($"Watermark added to page {i}");
+
+                        canvas.RestoreState();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error processing page {i}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in AddWatermarkImage method: {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
+        }
+
+
+
+        private void AddWatermarkText_old(PdfDocument pdf, string watermarkText, float opacity)
+        {
+            try
+            {
+                float pageWidth = pdf.GetDefaultPageSize().GetWidth();
+                float pageHeight = pdf.GetDefaultPageSize().GetHeight();
+
+                for (int i = 1; i <= pdf.GetNumberOfPages(); i++)
+                {
+                    PdfPage page = pdf.GetPage(i);
+
+                    if (page == null || page.GetPdfObject() == null)
+                    {
+                        Console.WriteLine($"Skipping invalid page: {i}");
+                        continue;
+                    }
+
+                    int rotation = 0;
+
+                    try
+                    {
+                        rotation = page.GetRotation();
+                       // continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error getting rotation for page {i}: {ex.Message}");
+                        continue;
+                    }
+
+                    float effectiveWidth = pageWidth;
+                    float effectiveHeight = pageHeight;
+
+                    if (rotation == 90 || rotation == 270)
+                    {
+                        effectiveWidth = pageHeight;
+                        effectiveHeight = pageWidth;
+                    }
+
+                    PdfCanvas canvas = new PdfCanvas(page);
+                    canvas.SaveState();
+
+                    // Create transparency group
+                    //PdfExtGState gs = new PdfExtGState().SetFillOpacity(opacity);
+                    // canvas.SetExtGState(gs);
+
+                    // Define a font family
+                    PdfFont font = PdfFontFactory.CreateFont("Helvetica");
+
+                    float fontSize = 48;
+
+                    // Calculate the width and height of the watermark text
+                    float textWidth = font.GetWidth(watermarkText, fontSize);
+                    float textHeight = font.GetFontProgram().GetFontMetrics().GetTypoAscender() * fontSize;
+
+                    // Calculate the position to center the text horizontally and vertically
+                    float x = (effectiveWidth - textWidth) / 2;
+                    float y = (effectiveHeight - textHeight) / 2;
+
+                    canvas.BeginText()
+                        .SetFontAndSize(font, fontSize)
+                        .SetTextMatrix(1, 0, 0, 1, textWidth, textHeight)
+                        .SetColor(ColorConstants.BLACK, true)
+                        .SetFillColor(ColorConstants.RED)// Adjust position to center
+                        .ShowText(watermarkText)
+                        .EndText();
+
+                    canvas.RestoreState();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in AddWatermark method: {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
+        }
+
+        private void AddWatermarkImage(PdfDocument pdf, string imagePath)
+        {
+            try
+            {
+                // Load the image to be used as a watermark
+                ImageData imageData = ImageDataFactory.Create(imagePath);
+
+                // Get the total number of pages in the document
+                int numberOfPages = pdf.GetNumberOfPages();
+                Console.WriteLine($"Total number of pages: {numberOfPages}");
+
+                for (int i = 1; i <= numberOfPages; i++)
+                {
+                    try
+                    {
+                        PdfPage page = pdf.GetPage(i);
+
+                        if (page == null)
+                        {
+                            Console.WriteLine($"Page {i} is null. Skipping.");
+                            continue;
+                        }
+
+                        if (page.GetPdfObject() == null)
+                        {
+                            Console.WriteLine($"PDF object for page {i} is null. Skipping.");
+                            continue;
+                        }
+
+                        // Get page dimensions and handle rotation
+                        Rectangle pageSize = page.GetPageSize();
+                        if (pageSize == null)
+                        {
+                            Console.WriteLine($"Page size is null for page {i}. Skipping.");
+                            continue;
+                        }
+
+                        float pageWidth = pageSize.GetWidth();
+                        float pageHeight = pageSize.GetHeight();
+
+                        int rotation = 0;
+                        try
+                        {
+                            rotation = page.GetRotation();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error getting rotation for page {i}: {ex.Message}");
+                            rotation = 0; // Default rotation if not available
+                        }
+
+                        float effectiveWidth = pageWidth;
+                        float effectiveHeight = pageHeight;
+
+                        // Adjust dimensions if the page is rotated
+                        if (rotation == 90 || rotation == 270)
+                        {
+                            effectiveWidth = pageHeight;
+                            effectiveHeight = pageWidth;
+                        }
+
+                        PdfCanvas canvas = new PdfCanvas(page);
+                        canvas.SaveState();
+
+                        // Set the transparency for the watermark
+                        PdfExtGState gState = new PdfExtGState().SetFillOpacity(0.1f);
+                        canvas.SetExtGState(gState);
+
+                        // Maintain the aspect ratio of the image
+                        float aspectRatio = imageData.GetWidth() / imageData.GetHeight();
+                        float imageWidth = effectiveWidth;
+                        float imageHeight = effectiveWidth / aspectRatio;
+
+                        if (imageHeight > effectiveHeight)
+                        {
+                            imageHeight = effectiveHeight;
+                            imageWidth = effectiveHeight * aspectRatio;
+                        }
+
+                        // Calculate the position to center the image
+                        float x = (effectiveWidth - imageWidth) / 2;
+                        float y = (effectiveHeight - imageHeight) / 2;
+
+                        // Add the image to the canvas
+                        canvas.AddImageWithTransformationMatrix(imageData, imageWidth, 0, 0, imageHeight, x, y, false);
+
+                        Console.WriteLine($"Watermark added to page {i}");
+
+                        canvas.RestoreState();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error processing page {i}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in AddWatermarkImage method: {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
+        }
+
+        private void AddWatermarkText(PdfDocument pdf, string watermarkText, float opacity)
+        {
+            int numberOfPages = pdf.GetNumberOfPages();
+            for (int i = 1; i <= numberOfPages; i++)
+            {
+                PdfPage page = pdf.GetPage(i);
+                PdfCanvas canvas = new PdfCanvas(page);
+                canvas.SaveState();
+
+                PdfExtGState gState = new PdfExtGState().SetFillOpacity(opacity);
+                canvas.SetExtGState(gState);
+
+                // Set font and color for the watermark
+                canvas.BeginText();
+                //PdfCanvas pdfCanvas = canvas.SetFontAndSize(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD), 60);
+                canvas.SetFontAndSize(PdfFontFactory.CreateFont("Helvetica-Bold"), 60);
+                canvas.SetColor(ColorConstants.GRAY, true);
+
+
+
+
+
+                // Rotate and position the watermark text
+               // canvas.ShowTextAligned(watermarkText, 298, 421, pdf.GetPageNumber(page), TextAlignment.CENTER, VerticalAlignment.MIDDLE, 45);
+                canvas.EndText();
+
+                canvas.RestoreState();
+            }
+        }
+
 
         private void SetPageMargins(Document document)
         {
@@ -995,7 +1715,7 @@ namespace Trac_WorkReport.Controllers
             // Adjust logo size based on available width (e.g., 20% of the page width)
             var logoWidth = pageWidth * 0.05f;
 
-            var logoPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.png");
+            var logoPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.jpeg");
             var logo = ImageDataFactory.Create(logoPath);
             //var img = new Image(logo).SetWidth(logoWidth).SetMarginBottom(10).SetHorizontalAlignment(HorizontalAlignment.LEFT);
             var img = new Image(logo).SetWidth(logoWidth).SetHorizontalAlignment(HorizontalAlignment.CENTER);

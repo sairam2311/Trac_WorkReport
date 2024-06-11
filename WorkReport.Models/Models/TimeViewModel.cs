@@ -23,6 +23,7 @@ namespace WorkReport.Models.Models
 
         public List<EmployeeWithRole> employeeWithRoles { get; set; }
 
+        [ValidateNever]
         public List<ViewReportViewModel> reportViewModels { get; set; }
 
     }
@@ -37,7 +38,7 @@ namespace WorkReport.Models.Models
         public string ReportingOfficerName { get; set; }
         public string ReviewingofficerName { get; set; }
 
-     
+
     }
 
     public class RoleViewModelTS

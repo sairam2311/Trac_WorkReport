@@ -1,0 +1,106 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@using WorkReport.Models.Models
+@model UserIndexViewModelTS
+
+@{
+    // Convert UTC +5:30 to local time
+    var localDate = DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("dd/MM/yyyy");
+}
+
+<form asp-action="AssignWork" method="post">
+    <!-- User Information Section -->
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title">User Information</h5>
+                <hr>
+                @* //<input id="" asp-for="@Model.CurrentUser.Id" hidden />*@
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" value="@Model.CurrentUser.EmployeeName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeID">Employee ID</label>
+                            <input type="text" class="form-control" id="employeeID" value="@Model.CurrentUser.EmployeeID" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="reportingOfficer">Reporting Officer</label>
+                            <input type="text" class="form-control" id="reportingOfficer" value="@Model.CurrentUser.ReportingOfficerName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="designation">Designation</label>
+                            <input type="text" class="form-control" id="designation" value="@Model.CurrentUser.Roles.FirstOrDefault()?.RoleName" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Addition Form -->
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title text-primary">Add Work</h5>
+                <hr>
+                <div class="form-group">
+                    <label asp-for="TimeSheet.ReportDate">Date</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control datepicker" asp-for="TimeSheet.ReportDate" placeholder="Select Date" readonly>
+                        <span class="input-group-text bg-primary text-light"><i class="bi bi-calendar"></i></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="TimeSheet.Work">Work Title</label>
+                    <textarea class="form-control" asp-for="TimeSheet.WorkTitle" rows="2" placeholder="Enter your Work Title"></textarea>
+                </div>
+                <div class="form-group">
+                    <label asp-for="TimeSheet.Work">Work Details</label>
+                    <textarea class="form-control" asp-for="TimeSheet.Work" rows="6" placeholder="Enter your Work Details"></textarea>
+                </div>
+                <div class="text-right mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var today = new Date();
+            // var formattedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+            // var formattedDate = '@localDate';
+
+            //// Adjust the date and time to UTC+5:30 timezone
+            //today.setHours(today.getHours() + 5); // Add 5 hours
+            //today.setMinutes(today.getMinutes() + 30); // Add 30 minutes
+
+            //var formattedDate = (today.getDate() < 10 ? '0' : '') + today.getDate() + '/' + ((today.getMonth() + 1) < 10 ? '0' : '') + (today.getMonth() + 1) + '/' + today.getFullYear() + ' ' + ((today.getHours() < 10 ? '0' : '') + today.getHours()) + ':' + ((today.getMinutes() < 10 ? '0' : '') + today.getMinutes());
+
+            var formattedDate = (today.getDate() < 10 ? '0' : '') + today.getDate() + '/' + ((today.getMonth() + 1) < 10 ? '0' : '') + (today.getMonth() + 1) + '/' + today.getFullYear() + ' ' + ((today.getHours() < 10 ? '0' : '') + today.getHours()) + ':' + ((today.getMinutes() < 10 ? '0' : '') + today.getMinutes());
+
+            $('.datepicker').datepicker({
+                format: 'dd/mm/yyyy',
+                todayHighlight: true,
+                autoclose: true,
+                endDate: today,
+                orientation: 'auto'
+            }).val(formattedDate);
+
+            // Trigger datepicker only when the datepicker icon is clicked
+            $('.input-group-text').on('click', function () {
+                $('.datepicker').datepicker('show');
+            });
+        });
+    </script>
+}
