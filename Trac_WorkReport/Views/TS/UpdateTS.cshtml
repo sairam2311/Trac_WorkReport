@@ -59,12 +59,15 @@
     </div>*@
 
     <!-- Project Addition Form -->
+
+    
     <div class="container mt-4">
         <div class="card shadow">
             <div class="card-body">
                 <h5 class="card-title text-primary">Add Work</h5>
+                <input type="hidden" name="UserId" value="@Model.reportViewModels.First().UserId" />
                 <hr>
-
+               
                 @foreach (var reportViewModel in Model.reportViewModels)
                 {
                     @foreach (var timeSheet in reportViewModel.TimeSheets)

@@ -1076,30 +1076,69 @@ namespace Trac_WorkReport.Controllers
         }
 
         [HttpGet]
-        public IActionResult UpdateTS(Guid ID)
+        public IActionResult UpdateTS(Guid ID, UserIndexViewModelTS model)
         {
+            // Check if the reportViewModels list is null or empty
+            if (model.reportViewModels == null || !model.reportViewModels.Any())
+            {
+                // Return a BadRequest response with an appropriate message
+                return BadRequest("The report view models are null or empty.");
+            }
+
+            // Extract the UserId safely
+            var userId = model.reportViewModels.First().UserId;
+
+            // Retrieve the timesheet by ID
             var timesheet = _timeSheetRepository.GetTimeSheetsById(ID);
             if (timesheet == null)
             {
-                return NotFound();
+                return NotFound("Timesheet not found.");
             }
 
+            // Prepare the view model for the view
             var viewModel = new UserIndexViewModelTS
             {
                 reportViewModels = new List<ViewReportViewModel>
         {
             new ViewReportViewModel
             {
-                TimeSheets = timesheet
+                TimeSheets =  timesheet, // Assuming TimeSheets is a collection
+                UserId = userId // Ensure UserId is included in the view model if needed
             }
         }
             };
 
+            // Return the view with the prepared view model
             return View(viewModel);
         }
 
-    [HttpGet]
-        public IActionResult UpdateTSdummy(Guid ID)
+
+        //[HttpGet]
+        //public IActionResult UpdateTS(Guid ID, UserIndexViewModelTS model)
+        //{
+        //    var userId = model.reportViewModels.First().UserId;
+        //    var timesheet = _timeSheetRepository.GetTimeSheetsById(ID);
+        //    if (timesheet == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var viewModel = new UserIndexViewModelTS
+        //    {
+        //        reportViewModels = new List<ViewReportViewModel>
+        //{
+        //    new ViewReportViewModel
+        //    {
+        //        TimeSheets = timesheet
+        //    }
+        //}
+        //    };
+
+        //    return View(viewModel);
+        //}
+
+        [HttpGet]
+        public IActionResult UpdateTSdummy(Guid ID, UserIndexViewModelTS model)
         {
             var timesheet = _timeSheetRepository.GetTimeSheetsById(ID);
             if (timesheet == null)
