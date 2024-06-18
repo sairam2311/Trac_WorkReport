@@ -120,10 +120,8 @@
         </div>
     </div>
 </div>*@
-@using WorkReport.Models.Models;
+@using WorkReport.Models.Models
 @model UserIndexViewModelTS
-
-
 
 @{
     ViewData["Title"] = "View Report";
@@ -156,6 +154,11 @@
 
                     @if (Model.reportViewModels.FirstOrDefault().TimeSheets != null && Model.reportViewModels.FirstOrDefault().TimeSheets.Any())
                     {
+                        <div class="alert alert-info">
+                            @* Debugging Output *@
+                            <p>UserId: @Model.reportViewModels.FirstOrDefault()?.UserId</p>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped dataTable">
                                 <thead class="bg-dark text-white">
@@ -166,7 +169,7 @@
                                         <th>Uploaded Date</th>
                                         <th>Remarks by Reviewing Officer</th>
                                         <th>Remarks by Reporting Officer</th>
-                                        <th></th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -181,7 +184,7 @@
                                             <td>@emp.RemarksByRpOf</td>
                                             <td>
                                                 <div class="w-50 btn-group" role="group">
-                                                    <a asp-controller="TS" asp-action="UpdateTS" asp-route-id="@emp.TSid" class="mx-1">
+                                                    <a asp-controller="TS" asp-action="UpdateTS" asp-route-id="@emp.TSid" asp-route-userId="@Model.reportViewModels.FirstOrDefault()?.UserId" class="mx-1">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
                                                 </div>
@@ -208,6 +211,7 @@
         </div>
     </div>
 </div>
+
 
 
 

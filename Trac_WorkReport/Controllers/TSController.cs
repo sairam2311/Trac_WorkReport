@@ -620,8 +620,7 @@ using iText.Kernel.Pdf.Canvas;
 using iText.Kernel.Pdf.Extgstate;
 using iText.Kernel.Font;
 using iText.Layout.Element;
-
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Trac_WorkReport.Controllers
 {
@@ -833,8 +832,8 @@ namespace Trac_WorkReport.Controllers
             return View(model);
         }
 
-
-        public async Task<IActionResult> AssignWork()
+        [HttpGet]
+        public async Task<IActionResult> AssignWorkdummy(string Id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             
@@ -864,8 +863,8 @@ namespace Trac_WorkReport.Controllers
                 });
             }
 
-            var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(currentUser.Id);
-            var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(currentUser.Id);
+            var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(Id);
+            var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(Id);
 
             var model = new UserIndexViewModelTS
             {
@@ -889,6 +888,91 @@ namespace Trac_WorkReport.Controllers
 
             return View(model);
         }
+
+
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> AssignWork(string Id)
+        {
+            try
+            {
+                // Fetch the currently authenticated user
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return NotFound("Current user not found");
+                }
+
+                // Fetch the roles of the current user
+                var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+
+                // Fetch all users from the system asynchronously
+                var allUsers = await _userManager.Users.ToListAsync();
+
+                // Initialize the list to store all users with their roles
+                var allUsersWithRoles = new List<EditUserViewModelTS>();
+
+                // Fetch roles for each user sequentially to avoid DbContext concurrency issues
+                foreach (var user in allUsers)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    allUsersWithRoles.Add(new EditUserViewModelTS
+                    {
+                        Id = user.Id,
+                        Email = user.Email,
+                        EmployeeID = user.EmployeeID,
+                        EmployeeName = user.EmployeeName,
+                        Roles = roles.Select(r => new RoleViewModelTS
+                        {
+                            RoleName = r,
+                            IsSelected = true
+                        }).ToList()
+                    });
+                }
+
+                // Fetch the names of the reporting and reviewing officers for the specified user ID
+                var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(Id) ?? "N/A";
+                var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(Id) ?? "N/A";
+
+                // Construct the view model with the current user's details and the list of all users with roles
+                var model = new UserIndexViewModelTS
+                {
+                    CurrentUser = new EditUserViewModelTS
+                    {
+                        Id = currentUser.Id,
+                        Email = currentUser.Email,
+                        EmployeeID = currentUser.EmployeeID,
+                        EmployeeName = currentUser.EmployeeName,
+                        ReportingOfficerName = reportingOfficerName,
+                        ReviewingofficerName = reviewingOfficerName,
+                        Roles = currentUserRoles.Select(r => new RoleViewModelTS
+                        {
+                            RoleName = r,
+                            IsSelected = true
+                        }).ToList()
+                    },
+                    AllUsersWithRoles = allUsersWithRoles,
+                    TimeSheet = new TimeSheet() // Initialize the TimeSheet object
+                };
+
+                // Return the view with the constructed model
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (logging mechanism should be implemented as per your logging strategy)
+                // _logger.LogError(ex, "An error occurred while assigning work");
+
+                // Return a user-friendly error page or message
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+
+
 
 
 
@@ -998,7 +1082,8 @@ namespace Trac_WorkReport.Controllers
                     ReportDate = report.ReportDate,
                     CurrentDate = report.CurrentDate,
                     RemarksByReOf = report.RemarksByReOf,
-                    RemarksByRpOf = report.RemarksByRpOf
+                    RemarksByRpOf = report.RemarksByRpOf,
+                    EmployeeGUID=report.EmployeeGUID
                 });
             }
 
@@ -1066,7 +1151,8 @@ namespace Trac_WorkReport.Controllers
                     ReportDate = report.ReportDate,
                     CurrentDate = report.CurrentDate,
                     RemarksByReOf = report.RemarksByReOf,
-                    RemarksByRpOf = report.RemarksByRpOf
+                    RemarksByRpOf = report.RemarksByRpOf,
+                    EmployeeGUID = report.EmployeeGUID
                 });
             }
 
@@ -1076,18 +1162,27 @@ namespace Trac_WorkReport.Controllers
         }
 
         [HttpGet]
-        public IActionResult UpdateTS(Guid ID, UserIndexViewModelTS model)
+        public IActionResult UpdateTS(Guid ID, string userId)
         {
-            // Check if the reportViewModels list is null or empty
-            if (model.reportViewModels == null || !model.reportViewModels.Any())
-            {
-                // Return a BadRequest response with an appropriate message
-                return BadRequest("The report view models are null or empty.");
-            }
+            //// Check if the reportViewModels list is null or empty
+            //if (model.reportViewModels == null || !model.reportViewModels.Any())
+            //{
+            //    // Return a BadRequest response with an appropriate message
+            //    return BadRequest("The report view models are null or empty.");
+            //}
 
             // Extract the UserId safely
-            var userId = model.reportViewModels.First().UserId;
+           
+          //
+          //  //= model.reportViewModels.First().UserId;
 
+            //if (userId? == string.Empty)
+            //{
+            //    return BadRequest("Invalid User ID.");
+            //}
+
+
+            var userId1 = userId;
             // Retrieve the timesheet by ID
             var timesheet = _timeSheetRepository.GetTimeSheetsById(ID);
             if (timesheet == null)
@@ -1103,7 +1198,7 @@ namespace Trac_WorkReport.Controllers
             new ViewReportViewModel
             {
                 TimeSheets =  timesheet, // Assuming TimeSheets is a collection
-                UserId = userId // Ensure UserId is included in the view model if needed
+                UserId = userId1 // Ensure UserId is included in the view model if needed
             }
         }
             };
