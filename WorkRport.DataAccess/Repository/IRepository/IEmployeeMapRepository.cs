@@ -24,6 +24,8 @@ namespace WorkRport.DataAccess.Repository.IRepository
 
         string GetReportingOfficerName(string employeeId);
 
+        List<empreviewreport> GetOfficersID(string employeeId);
+
         List<EmployeeWithRole> GeEmployeesbyrevieworRep(string employeeId);
     }
 }

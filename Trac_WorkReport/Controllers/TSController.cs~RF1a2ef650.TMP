@@ -1100,20 +1100,22 @@ namespace Trac_WorkReport.Controllers
 
             return View(viewModel);
         }
+
         [HttpPost]
         public async Task<IActionResult> ViewReport(UserIndexViewModelTS model)
         {
+            // Check if there are any reportViewModels to avoid potential null reference exceptions
             if (!model.reportViewModels.Any())
             {
-               // return View("Error", new CustomErrorViewModel { ErrorMessage = "No report data found." });
+                return View("Error", new ErrorViewModel { ErrorMessage = "No report data found." });
             }
 
+            // Extract userId from the first reportViewModel
             var firstReportViewModel = model.reportViewModels.First();
             var userId = firstReportViewModel.UserId;
 
             // Fetch the user's timesheets from the repository
             var reports = _timeSheetRepository.GetTimeSheetsByEmployeeId(userId);
-
             // Fetch the current user's details
             var cuser = await _userManager.FindByIdAsync(userId);
 
@@ -1128,23 +1130,25 @@ namespace Trac_WorkReport.Controllers
             // Create a list to hold the transformed timesheet view models
             var timeSheetViewModels = new List<TimeSheet>();
 
-            // Handle the transformation of each report sequentially
-            foreach (var report in reports)
+            // Fetch the AssignedBy user details in parallel for non "Self Reporting" entries
+            var userTasks = reports
+                .Where(r => r.AssignedBy != "Self Reporting")
+                .Select(async r => new
+                {
+                    Report = r,
+                    AssignedByName = (await _userManager.FindByIdAsync(r.AssignedBy))?.EmployeeName ?? "Unknown"
+                })
+                .ToList();
+
+            // Await all user fetching tasks to complete
+            var assignedByUsers = await Task.WhenAll(userTasks);
+
+            // Iterate over the fetched reports and assignedBy user details
+            foreach (var userTask in assignedByUsers)
             {
-                string assignedByName;
+                var report = userTask.Report;
+                var assignedByName = userTask.AssignedByName;
 
-                // Fetch the 'AssignedBy' user's name only if it's not "Self Reporting"
-                if (report.AssignedBy == "Self Reporting")
-                {
-                    assignedByName = "Self Reporting";
-                }
-                else
-                {
-                    var user = await _userManager.FindByIdAsync(report.AssignedBy);
-                    assignedByName = user?.EmployeeName ?? "Unknown";
-                }
-
-                // Add the transformed report to the view model list
                 timeSheetViewModels.Add(new TimeSheet
                 {
                     TSid = report.TSid,
@@ -1158,7 +1162,7 @@ namespace Trac_WorkReport.Controllers
                 });
             }
 
-            // Update the first report view model with the transformed timesheets and user details
+            // Assign the transformed timesheets to the model's first report view model
             firstReportViewModel.TimeSheets = timeSheetViewModels;
             firstReportViewModel.EmployeeName = cuser?.EmployeeName ?? "Unknown";
             firstReportViewModel.EmployeeID = cuser?.EmployeeID ?? "Unknown";
@@ -1168,10 +1172,8 @@ namespace Trac_WorkReport.Controllers
         }
 
 
-
-
         [HttpGet]
-        public async Task<IActionResult> UpdateTS(Guid ID, string userId)
+        public IActionResult UpdateTS(Guid ID, string userId)
         {
             //// Check if the reportViewModels list is null or empty
             //if (model.reportViewModels == null || !model.reportViewModels.Any())
@@ -1181,20 +1183,15 @@ namespace Trac_WorkReport.Controllers
             //}
 
             // Extract the UserId safely
-
-            //
-            //  //= model.reportViewModels.First().UserId;
+           
+          //
+          //  //= model.reportViewModels.First().UserId;
 
             //if (userId? == string.Empty)
             //{
             //    return BadRequest("Invalid User ID.");
             //}
-            // Fetch the current user's details
-            var currentUser = await _userManager.GetUserAsync(User);
 
-            var cuser = await _userManager.FindByIdAsync(userId);
-
-         
 
             var userId1 = userId;
             // Retrieve the timesheet by ID
@@ -1205,35 +1202,16 @@ namespace Trac_WorkReport.Controllers
             }
 
             // Prepare the view model for the view
-            // Fetch officer IDs or GUIDs related to the user
-            //var revrep = _employeeMapRep.GetOfficersID(userId);
-            var revrep = _employeeMapRep.GetOfficersID(userId);
-            // Handle the case where revrep is null or empty
-            var reportOfc = "Unknown";
-            var reviewOfc = "Unknown";
-
-            if (revrep != null && revrep.Count > 0)
-            {
-                reportOfc = revrep[0]?.ReportGUID ?? "Unknown";
-                reviewOfc = revrep[0]?.ReviewGUID ?? "Unknown";
-            }
-
-            // Prepare the view model for the view
             var viewModel = new UserIndexViewModelTS
             {
                 reportViewModels = new List<ViewReportViewModel>
-    {
-        new ViewReportViewModel
         {
-            TimeSheets = timesheet,
-            UserId = userId, // Ensure UserId is included in the view model if needed
-            EmployeeName = cuser?.EmployeeName ?? "Unknown",
-            EmployeeID = cuser?.EmployeeID ?? "Unknown",
-            currentuser = currentUser?.Id ?? "Unknown",
-            ReportOfc = reportOfc,
-            ReviewOfc = reviewOfc
+            new ViewReportViewModel
+            {
+                TimeSheets =  timesheet, // Assuming TimeSheets is a collection
+                UserId = userId1 // Ensure UserId is included in the view model if needed
+            }
         }
-    }
             };
 
             // Return the view with the prepared view model

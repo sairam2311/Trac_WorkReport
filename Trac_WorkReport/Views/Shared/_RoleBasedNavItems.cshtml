@@ -17,8 +17,12 @@
 @if (roles.Any(role => allowedRoles.Contains(role)))
 {
     <li class="nav-item">
-        <a class="nav-link text-light" asp-area="" asp-controller="TS" asp-action="Index">Home</a>
+        <a class="nav-link text-light" asp-area="" asp-controller="TS" asp-action="Index">Work Report</a>
     </li>
+}
+else
+{
+   
 }
 
 @if (roles.Contains("TEST"))

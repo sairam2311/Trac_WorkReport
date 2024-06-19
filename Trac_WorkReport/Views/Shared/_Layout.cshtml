@@ -551,6 +551,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Trac_WorkReport</title>
+
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <!-- Bootstrap Icons CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -616,6 +618,32 @@
     <div class="container-fluid flex-grow-1">
         <!-- Added flex-grow-1 to main container for the sticky footer effect -->
         <main role="main" class="pb-3">
+            <!-- Script to initialize DataTables for tables with the class 'dataTable' -->
+            <script>
+                // Function to initialize DataTables for all tables with a specific class
+                function initializeDataTables() {
+                    $('table.dataTable').DataTable({
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": false,
+                        "responsive": true,
+                        "language": {
+                            "paginate": {
+                                "previous": "&laquo;",
+                                "next": "&raquo;"
+                            }
+                        }
+                    });
+                }
+
+                // Call the function to initialize DataTables for all tables with class 'dataTable'
+                $(document).ready(function () {
+                    initializeDataTables();
+                });
+            </script>
             @RenderBody()
         </main>
     </div>
@@ -642,6 +670,7 @@
 </body>
 
 </html>
+
 
 
 

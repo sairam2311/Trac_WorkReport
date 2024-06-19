@@ -167,7 +167,7 @@
                     @if (Model.reportViewModels.FirstOrDefault()?.TimeSheets != null && Model.reportViewModels.FirstOrDefault().TimeSheets.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped dataTable">
+                            <table class="table table-bordered table-striped">
                                 <thead class="bg-dark text-white">
                                     <tr>
                                         <th>Work</th>
@@ -320,28 +320,7 @@
 
 
 
-@section Scripts {
-    <!-- Initialize DataTables -->
-    <script>
-        $(document).ready(function () {
-            $('table.dataTable').DataTable({
-                "paging": true,
-                "lengthChange": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-                "language": {
-                    "paginate": {
-                        "previous": "&laquo;",
-                        "next": "&raquo;"
-                    }
-                }
-            });
-        });
-    </script>
-}
+
 
 
 

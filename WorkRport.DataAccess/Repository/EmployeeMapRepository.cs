@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Trac_WorkReport.Models;
@@ -75,6 +76,7 @@ namespace WorkRport.DataAccess.Repository
         }
 
 
+      
         public string GetReportingOfficerName(string employeeId)
         {
            
@@ -86,6 +88,27 @@ namespace WorkRport.DataAccess.Repository
 
             return reportingingOfficerName;
         }
+
+        public List<empreviewreport> GetOfficersID(string employeeId)
+        {
+            // Query the database for matching records
+            var employeeMappings = _db.employeeMappings
+                .Where(emp => emp.EmployeeId == employeeId)
+                .ToList(); // Get a list of matching records
+
+
+            var revrep = employeeMappings.Select(emp => new empreviewreport
+            {
+                EmployeeGUID = emp.EmployeeId,
+                ReportGUID = emp.ReportingOfficerId,
+                ReviewGUID = emp.ReviewingOfficerId
+            }).ToList();
+
+            //(select * from  _db.employeeMappings  emp where emp.EmployeeId = employeeId).FirstOrDefault();
+            return revrep;
+        }
+     
+
 
         public List<EmployeeWithRole> GeEmployeesbyrevieworRep(string employeeId)
         {

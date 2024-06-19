@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Org.BouncyCastle.Bcpg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,10 @@ namespace WorkReport.Models.Models
 
         [ValidateNever]
         public List<ViewReportViewModel> reportViewModels { get; set; }
+
+
+        [ValidateNever]
+        public List<ErrorViewModel> ErrorViewModel { get; set; }
 
     }
 
@@ -61,6 +66,32 @@ namespace WorkReport.Models.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public IEnumerable<TimeSheet> TimeSheets { get; set; }
+
+        public string EmployeeName { get; set; }
+
+        public string EmployeeID { get; set; }
+
+        public string currentuser { get; set; } 
+
+        public string ReviewOfc { get; set; }   
+        public string ReportOfc { get; set; }
     }
+
+    public class ErrorViewModel
+    {
+        public string RequestId { get; set; }
+        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+        // Add this property
+        public string ErrorMessage { get; set; }
+    }
+
+    public class empreviewreport
+    {
+        public string EmployeeGUID { get; set; }
+        public string ReviewGUID { get; set; }
+        public string ReportGUID { get; set; }
+    }
+
 
 }

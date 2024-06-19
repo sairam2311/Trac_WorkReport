@@ -135,8 +135,11 @@
     string[] allowedRolesForEmployeeList = { "SO","ASO", "ADG", "LO", "AO", "HOD" };
     string[] allowedRolesForSelfReport = { "SA", "ASO", "PA", "SO" };
 
+    string[] allowedRolesForWR = { "SA", "PA", "SRSA", "RSA", "GIS Analyst", "PE" };
+
     bool userHasAllowedRoleForEmployeeList = UserHasAnyRole(allowedRolesForEmployeeList);
     bool userHasAllowedRoleForSelfReport = UserHasAnyRole(allowedRolesForSelfReport);
+    bool userHasallowedRolesForWR = UserHasAnyRole(allowedRolesForWR);
 }
 
 @functions {
@@ -156,7 +159,7 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card text-white bg-secondary shadow-sm">
+            <div class="card text-white border-primary shadow-sm">
                 <div class="card-header">
                     <h4 class="mb-0">User Details</h4>
                 </div>
@@ -164,12 +167,12 @@
                     <div class="row mb-4">
                         <div class="col-sm-6">
                             <div class="mb-3">
-                                <label class="form-label ">Full Name:</label>
-                                <p class="form-text card-text  d-inline-block ms-3">@Model.CurrentUser.EmployeeName</p>
+                                <label class="form-label col-form-label">Full Name:</label>
+                                <p class="form-text  d-inline-block ms-3">@Model.CurrentUser.EmployeeName</p>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Employee ID:</label>
-                                <p class="form-text fw-bold d-inline-block ms-3" style="color: cornsilk;">@Model.CurrentUser.EmployeeID</p>
+                                <p class="form-text fw-bold d-inline-block ms-3 text-light">@Model.CurrentUser.EmployeeID</p>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Reporting Officer:</label>
@@ -201,42 +204,35 @@
                             </div>
                         </div>
                     </div>
-                    <hr>
+                </div>
                     @if (userHasAllowedRoleForSelfReport)
                     {
-                       @* <div class="row">
-                            <div class="col text-end">
-                                <a asp-controller="TS" asp-action="Create" class="btn btn-primary">
-                                    <i class="bi bi-plus-circle"></i> Add Self Report
-                                </a>
-                            </div>
-                        </div>*@
-
-
-                        <div class="row ">
-                           @* <div class="col-6 text-end">*@
-                              
-                           @* </div>*@
+                        <div class="card-footer text-muted">
+                        <div class="row">
                             <div class="col text-end">
                                 <a asp-controller="TS" asp-action="ViewReport" asp-route-id="@Model.CurrentUser.Id" class="btn btn-primary">
                                     <i class="bi bi-pencil-square"></i> View Report
                                 </a>
-                                <a asp-controller="TS" asp-action="Create" class="btn btn-primary">
+                                <a asp-controller="TS" asp-action="Create" class="btn btn-primary ms-2">
                                     <i class="bi bi-plus-circle"></i> Add Self Report
                                 </a>
                             </div>
                         </div>
+                        </div>
                     }
                 </div>
-            </div>
+          
         </div>
     </div>
+
+
 </div>
 
 
 <div class="mt-5">
     <div class="row">
-        <div class="@if (userHasAllowedRoleForEmployeeList) {
+     @*   <div class="@if (userHasallowedRolesForWR)
+{
         <text>col-md-6</text>
  } else {
         <text>col-md-12</text>
@@ -274,11 +270,11 @@
                     }
                 </tbody>
             </table>
-        </div>
+        </div>*@
 
         @if (userHasAllowedRoleForEmployeeList)
         {
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <h4 class="text-center">Employees List</h4>
                 <table class="table table-bordered table-striped dataTable">
                     <thead class="bg-dark text-white">
