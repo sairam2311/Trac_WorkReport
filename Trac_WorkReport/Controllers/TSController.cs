@@ -902,6 +902,7 @@ namespace Trac_WorkReport.Controllers
             {
                 // Fetch the currently authenticated user
                 var currentUser = await _userManager.GetUserAsync(User);
+                var cuser = await _userManager.FindByIdAsync(Id);
                 if (currentUser == null)
                 {
                     return NotFound("Current user not found");
@@ -945,8 +946,8 @@ namespace Trac_WorkReport.Controllers
                     {
                         Id = currentUser.Id,
                         Email = currentUser.Email,
-                        EmployeeID = currentUser.EmployeeID,
-                        EmployeeName = currentUser.EmployeeName,
+                        EmployeeID = cuser?.EmployeeID ?? "Unknown",
+                        EmployeeName = cuser?.EmployeeName ?? "Unknown",
                         ReportingOfficerName = reportingOfficerName,
                         ReviewingofficerName = reviewingOfficerName,
                         Roles = currentUserRoles.Select(r => new RoleViewModelTS
