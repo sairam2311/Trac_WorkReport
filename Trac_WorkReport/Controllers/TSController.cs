@@ -982,34 +982,41 @@ namespace Trac_WorkReport.Controllers
         public async Task<IActionResult> AssignWork(string Id, UserIndexViewModelTS model)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            if (ModelState.IsValid)
+            if (currentUser == null)
             {
-                // var timeSheet = model.TimeSheet;
-
-                var timeSheet = new TimeSheet
-                {
-                    EmployeeGUID = Id,
-                    Work = model.TimeSheet.Work,
-                    AssignedBy = currentUser.Id,
-                    WorkTitle = model.TimeSheet.WorkTitle,
-                    //CurrentDate = model.TimeSheet.CurrentDate.Date,
-                    RemarksByReOf = model.TimeSheet.RemarksByReOf,
-                    RemarksByRpOf = model.TimeSheet.RemarksByRpOf,
-                    // Adjust for UTC +5:30
-                    ReportDate = DateTime.SpecifyKind(model.TimeSheet.ReportDate, DateTimeKind.Utc)
-                    //.AddHours(5).AddMinutes(30)
-
-                    //ReportDate = DateTime.SpecifyKind(model.TimeSheet.ReportDate, DateTimeKind.Utc), // Ensure ReportDate is UTC
-                    //ReportDate = model.TimeSheet.ReportDate.Date
-
-
-                };
-                _timeSheetRepository.Add(timeSheet);
-                _timeSheetRepository.save();
-                return RedirectToAction(nameof(Index));
+                return BadRequest("Current user not found.");
             }
 
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var timeSheet = new TimeSheet
+                    {
+                        EmployeeGUID = Id,
+                        Work = model.TimeSheet.Work,
+                        AssignedBy = currentUser.Id,
+                        WorkTitle = model.TimeSheet.WorkTitle,
+                        RemarksByReOf = model.TimeSheet.RemarksByReOf,
+                        RemarksByRpOf = model.TimeSheet.RemarksByRpOf,
+                        ReportDate = DateTime.SpecifyKind(model.TimeSheet.ReportDate, DateTimeKind.Utc)
+                    };
 
+                    _timeSheetRepository.Add(timeSheet);
+                    _timeSheetRepository.save();
+
+                    // Redirect to the ViewReport action with EmployeeGUID
+                    return RedirectToAction("ViewReport", "TS", new { id = Id });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                // Consider using a logging framework to log the detailed exception
+                return StatusCode(500, "An error occurred while assigning work: " + ex.Message);
+            }
+
+            // If ModelState is not valid or other conditions fail, reload the view with the model
             var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
             var reportingOfficerName = _employeeMapRep.GetReportingOfficerName(currentUser.Id);
             var reviewingOfficerName = _employeeMapRep.GetReviewingOfficerName(currentUser.Id);
@@ -1031,6 +1038,7 @@ namespace Trac_WorkReport.Controllers
 
             return View(model);
         }
+
 
 
         [HttpGet]
@@ -1172,7 +1180,7 @@ namespace Trac_WorkReport.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> UpdateTS(Guid ID, string userId)
+        public async Task<IActionResult> UpdateTSOneMOre(Guid ID, string userId)
         {
             //// Check if the reportViewModels list is null or empty
             //if (model.reportViewModels == null || !model.reportViewModels.Any())
@@ -1240,6 +1248,64 @@ namespace Trac_WorkReport.Controllers
             // Return the view with the prepared view model
             return View(viewModel);
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateTS(Guid ID, string userId)
+        {
+            // Fetch the current user's details
+            var currentUser = await _userManager.GetUserAsync(User);
+            var cuser = await _userManager.FindByIdAsync(userId);
+
+            // Retrieve the timesheet by ID
+            var timesheet = _timeSheetRepository.GetTimeSheetsById(ID);
+            if (timesheet == null)
+            {
+                return NotFound("Timesheet not found.");
+            }
+
+            // Fetch officer IDs or GUIDs related to the user
+            var revrep = _employeeMapRep.GetOfficersID(userId);
+            var reportOfc = "Unknown";
+            var reviewOfc = "Unknown";
+
+            if (revrep != null && revrep.Count > 0)
+            {
+                reportOfc = revrep[0]?.ReportGUID ?? "Unknown";
+                reviewOfc = revrep[0]?.ReviewGUID ?? "Unknown";
+            }
+
+            // Prepare the view model for the view
+            var viewModel = new UserIndexViewModelTS
+            {
+                reportViewModels = new List<ViewReportViewModel>()
+            };
+
+            // Check if there are any timesheets to display
+            if (timesheet != null && timesheet.Any())
+            {
+                viewModel.reportViewModels.Add(new ViewReportViewModel
+                {
+                    TimeSheets = timesheet,
+                    UserId = userId,
+                    EmployeeName = cuser?.EmployeeName ?? "Unknown",
+                    EmployeeID = cuser?.EmployeeID ?? "Unknown",
+                    currentuser = currentUser?.Id ?? "Unknown",
+                    ReportOfc = reportOfc,
+                    ReviewOfc = reviewOfc
+                });
+            }
+            else
+            {
+                // Handle case where no timesheets are found (if needed)
+                // Optionally add a message or different handling here
+            }
+
+            // Return the view with the prepared view model
+            return View(viewModel);
+        }
+
+
 
 
         //[HttpGet]
@@ -1331,8 +1397,75 @@ namespace Trac_WorkReport.Controllers
         [HttpPost]
         public IActionResult UpdateTS(string ID, UserIndexViewModelTS model)
         {
-            return View(model);
+            if (string.IsNullOrEmpty(ID))
+            {
+                return BadRequest("Invalid or missing timesheet ID.");
+            }
+
+            if (model == null || model.reportViewModels == null || !model.reportViewModels.Any())
+            {
+                return BadRequest("The view model or report view models are null or empty.");
+            }
+
+            var timesheetCollection = model.reportViewModels.First().TimeSheets;
+
+            if (timesheetCollection == null || !timesheetCollection.Any())
+            {
+                return BadRequest("Timesheet data is missing or invalid.");
+            }
+
+            // Assuming you want to update all timesheets in the collection
+            foreach (var timesheetUpdate in timesheetCollection)
+            {
+                // Check if EmployeeGUID is provided and valid
+                if (timesheetUpdate.EmployeeGUID == null || timesheetUpdate.EmployeeGUID == string.Empty)
+                {
+                    return BadRequest("EmployeeGUID is required and cannot be null or empty.");
+                }
+
+                // Retrieve the existing timesheet to update (if needed)
+                var existingTimesheet = _timeSheetRepository.GetTimeSheetsById(timesheetUpdate.TSid).First(); // Adjust this based on your repository method
+
+                if (existingTimesheet == null)
+                {
+                    return BadRequest("Timesheet with ID " + timesheetUpdate.TSid + " not found."); // Handle case where timesheet is not found
+                }
+
+                // Update the existing timesheet fields
+                existingTimesheet.WorkTitle = timesheetUpdate.WorkTitle ?? "-";
+                existingTimesheet.Work = timesheetUpdate.Work;
+                existingTimesheet.RemarksByRpOf = timesheetUpdate.RemarksByRpOf ?? "-";
+                existingTimesheet.RemarksByReOf = timesheetUpdate.RemarksByReOf ?? "-"; 
+
+                try
+                {
+                    _timeSheetRepository.Update(existingTimesheet);
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Log the exception details
+                    // Consider using a logging framework to log the detailed exception
+                    return StatusCode(500, "An error occurred while updating timesheet: " + ex.Message);
+                }
+            }
+
+            try
+            {
+                _timeSheetRepository.save();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log the exception details
+                // Consider using a logging framework to log the detailed exception
+                return StatusCode(500, "An error occurred while saving changes: " + ex.Message);
+            }
+
+            // Redirect to the ViewReport action after successful update
+            return RedirectToAction("ViewReport", "TS", new { id = timesheetCollection.First().EmployeeGUID });
         }
+
+
+
 
         private string GenerateCsv(IEnumerable<TimeSheet> timeSheets)
         {

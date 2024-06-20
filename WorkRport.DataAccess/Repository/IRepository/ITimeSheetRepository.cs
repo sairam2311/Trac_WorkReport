@@ -10,9 +10,10 @@ namespace WorkRport.DataAccess.Repository.IRepository
 {
     public interface ITimeSheetRepository : IRepository<TimeSheet>
     {
-        void update(TimeSheet obj);
+       // void update(TimeSheet obj);
 
-        
+        void Update(TimeSheet timesheet);
+
         void save();
 
         IEnumerable<TimeSheet> GetTimeSheetsByEmployeeId(string employeeId);

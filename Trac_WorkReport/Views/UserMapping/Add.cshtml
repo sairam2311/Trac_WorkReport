@@ -211,19 +211,6 @@
             </div>
         </div>
 
-        <div class="col-lg-3 mb-1">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">Reviewing Officer</h5>
-                    <select class="form-select" id="ReviewingOfficerId" name="ReviewingOfficerId" multiple size="10">
-                        @foreach (var officer in Model.OfficerOptions.OrderBy(o => o.Value))
-                        {
-                            <option value="@officer.Value">@officer.Text</option>
-                        }
-                    </select>
-                </div>
-            </div>
-        </div>
 
         <div class="col-lg-3 mb-1">
             <div class="card">
@@ -238,6 +225,22 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-lg-3 mb-1">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Reviewing Officer</h5>
+                    <select class="form-select" id="ReviewingOfficerId" name="ReviewingOfficerId" multiple size="10">
+                        @foreach (var officer in Model.OfficerOptions.OrderBy(o => o.Text))
+                        {
+                            <option value="@officer.Value">@officer.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+     
 
         <div class="col-lg-3 mb-1">
             <div class="card">

@@ -55,3 +55,25 @@
         </tbody>
     </table>
 </div>
+@section Scripts {
+    <!-- Initialize DataTables -->
+    <script>
+        $(document).ready(function () {
+            $('table.dataTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "paginate": {
+                        "previous": "&laquo;",
+                        "next": "&raquo;"
+                    }
+                }
+            });
+        });
+    </script>
+}

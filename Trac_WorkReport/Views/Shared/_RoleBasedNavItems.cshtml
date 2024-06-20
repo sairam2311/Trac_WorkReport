@@ -11,7 +11,7 @@
 @{
     var user = await UserManager.GetUserAsync(User);
     var roles = await UserManager.GetRolesAsync(user);
-    var allowedRoles = new List<string> { "AA", "ASO", "AM", "APOM", "DPO", "GIS ANALYST","PA","PE","RSA","SA","SO","SRSA" };
+    var allowedRoles = new List<string> { "AA", "ASO", "AM", "APOM", "DPO", "GIS ANALYST", "PA", "PE", "RSA", "SA", "SO", "SRSA", "HOD", "GIS Analyst","LO","JD" };
 }
 
 @if (roles.Any(role => allowedRoles.Contains(role)))

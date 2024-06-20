@@ -4,14 +4,6 @@
 @{
 }
 
-@using WorkReport.Models.Models
-@model UserIndexViewModelTS
-
-@{
-    // Convert UTC +5:30 to local time
-    var localDate = DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("dd/MM/yyyy");
-}
-
 
     <!-- User Information Section -->
    @* <div class="container mt-4">
@@ -59,78 +51,110 @@
     </div>*@
 
     <!-- Project Addition Form -->
+@using WorkReport.Models.Models
+@model UserIndexViewModelTS
 
+@{
+    // Convert UTC +5:30 to local time
+    var localDate = DateTime.UtcNow.AddHours(5).AddMinutes(30).ToString("dd/MM/yyyy");
+}
 
-    <div class="container mt-4">
-
+<div class="container mt-4">
     <form asp-action="UpdateTS" method="post">
-                    <input type="hidden" name="UserId" value="@Model.reportViewModels.First().UserId" />
-                  
+        @if (Model.reportViewModels != null && Model.reportViewModels.Any())
+        {
+            <input type="hidden" name="UserId" value="@Model.reportViewModels.First().UserId" />
+            <input type="hidden" name="reportViewModels[0].TimeSheets[0].EmployeeGUID" value="@Model.reportViewModels.First().TimeSheets.First().EmployeeGUID" />
+            <input type="hidden" name="reportViewModels[0].TimeSheets[0].AssignedBy" value="@Model.reportViewModels.First().TimeSheets.First().AssignedBy" />
+            <input type="hidden" name="reportViewModels[0].TimeSheets[0].WorkTitle" value="@Model.reportViewModels.First().TimeSheets.First().WorkTitle" />
+            <input type="hidden" name="reportViewModels[0].TimeSheets[0].TSid" value="@Model.reportViewModels.First().TimeSheets.First().TSid" />
+          
             <div class="card shadow">
-
                 <h5 class="card-header text-primary">Update Work Details</h5>
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Employee Name:</label>
-                            <input type="text" class="form-control" disabled name="reportViewModels[0].EmployeeName" value="@Model.reportViewModels.FirstOrDefault()?.EmployeeName" />
+                            <input type="text" class="form-control" disabled value="@Model.reportViewModels.First().EmployeeName" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Employee ID:</label>
-                            <input type="text" class="form-control" disabled name="reportViewModels[0].EmployeeID" value="@Model.reportViewModels.FirstOrDefault()?.EmployeeID" />
+                            <input type="text" class="form-control" disabled value="@Model.reportViewModels.First().EmployeeID" />
                         </div>
                     </div>
 
-                    @foreach (var reportViewModel in Model.reportViewModels)
+                    @for (int i = 0; i < Model.reportViewModels.Count; i++)
                     {
-                        @foreach (var timeSheet in reportViewModel.TimeSheets)
+                        var reportViewModel = Model.reportViewModels[i];
+                        for (int j = 0; j < reportViewModel.TimeSheets.Count(); j++)
                         {
+                            var timeSheet = reportViewModel.TimeSheets.ElementAt(j);
                             <div class="mb-3">
                                 <div class="form-group mt-1">
                                     <label class="fw-bold">Work Title</label>
-                                <input type="text" class="form-control mt-1" readonly value="@timeSheet.WorkTitle">
+                                    <input type="text" class="form-control mt-1" readonly value="@timeSheet.WorkTitle">
                                 </div>
 
-                            <div class="form-group mt-1">
+                                <div class="form-group mt-1">
                                     <label class="fw-bold">Report Date</label>
-                                <input type="text" class="form-control mt-1" readonly value="@timeSheet.ReportDate">
+                                    <input type="text" class="form-control mt-1" readonly value="@timeSheet.ReportDate">
                                 </div>
 
-                            <div class="form-group mt-1">
+                                <div class="form-group mt-1">
                                     <label class="fw-bold">Work</label>
-                                <textarea class="form-control mt-1" rows="3" @(reportViewModel.UserId != reportViewModel.currentuser ? "readonly" : "") name="timeSheet.Work">@Html.Raw(timeSheet.Work)</textarea>
+                                    <textarea class="form-control mt-1" rows="3" @(reportViewModel.UserId != reportViewModel.currentuser ? "readonly" : "") name="reportViewModels[@i].TimeSheets[@j].Work">@Html.Raw(timeSheet.Work)</textarea>
                                 </div>
 
                                 @if (reportViewModel.currentuser == reportViewModel.ReportOfc)
                                 {
-                                <div class="form-group mt-1">
+                                    <div class="form-group mt-1">
                                         <label class="fw-bold">Remarks by Reporting Officer</label>
-                                    <textarea class="form-control mt-1" rows="6" name="timeSheet.RemarksByRpOf">@Html.Raw(timeSheet.RemarksByRpOf)</textarea>
+                                        <textarea class="form-control mt-1" rows="6" name="reportViewModels[@i].TimeSheets[@j].RemarksByRpOf">@Html.Raw(timeSheet.RemarksByRpOf)</textarea>
                                     </div>
+                                }
+                                else
+                                {
+                                    <input type="hidden" name="reportViewModels[0].TimeSheets[0].RemarksByRpOf" value="@Model.reportViewModels.First().TimeSheets.First().RemarksByRpOf" />
+                                   
                                 }
 
                                 @if (reportViewModel.currentuser == reportViewModel.ReviewOfc)
                                 {
-                                <div class="form-group mt-1">
+                                    <div class="form-group mt-1">
                                         <label class="fw-bold">Remarks by Reviewing Officer</label>
-                                    <textarea class="form-control mt-1" rows="6" name="timeSheet.RemarksByReOf">@Html.Raw(timeSheet.RemarksByReOf)</textarea>
+                                        <textarea class="form-control mt-1" rows="6" name="reportViewModels[@i].TimeSheets[@j].RemarksByReOf">@Html.Raw(timeSheet.RemarksByReOf)</textarea>
                                     </div>
+                                }
+                                else
+                                {
+                                    <input type="hidden" name="reportViewModels[0].TimeSheets[0].RemarksByReOf" value="@Model.reportViewModels.First().TimeSheets.First().RemarksByReOf" />
                                 }
                             </div>
                         }
                     }
-                    </div>
-                    <div class="card-footer text-muted">
+                </div>
+                <div class="card-footer text-muted">
                     <div class="row">
                         <div class="col text-end">
-                        <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
                         </div>
                     </div>
                 </div>
             </div>
-                </form>
+        }
+        else
+        {
+            <div class="alert alert-warning" role="alert">
+                No report view models available.
             </div>
-      
+        }
+    </form>
+</div>
+
+
+
+
+
 
 
 

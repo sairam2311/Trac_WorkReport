@@ -439,8 +439,8 @@ namespace Trac_WorkReport.Controllers
         [HttpGet]
         public IActionResult Add()
         {
-            var employees = GetUsersInRoles(new[] { "SO", "ASO", "SA", "PA" });
-            var officers = GetUsersInRoles(new[] { "SO", "ASO", "HOD", "ADG", "JD", "AO" });
+            var employees = GetUsersInRoles(new[] { "SO", "ASO", "SA", "PA", "AM","SRSA","RSA", "GIS Analyst" });
+            var officers = GetUsersInRoles(new[] { "SO", "ASO", "HOD", "ADG", "JD", "AO","LO" });
             var projects = _ProjectsRepo.GetProjectSelectListItems().ToList();
 
             var model = new EmployeeMappingViewModel
@@ -512,6 +512,28 @@ namespace Trac_WorkReport.Controllers
             return View(model);
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            // Implement logic to delete the item from your data source
+            // Example: Retrieve item by id and delete it
+            // This is just a placeholder, replace with your actual logic
+            var itemToDelete =  _context.employeeMappings.FirstOrDefault(e => e.Id == id);
+
+            if (itemToDelete == null)
+            {
+                return NotFound(); // Or handle the case where item is not found
+            }
+
+            // Perform delete operation (example)
+            _context.employeeMappings.Remove(itemToDelete);
+            await _context.SaveChangesAsync();
+
+            // Optionally, return a success message or status code
+            return Ok();
+        }
+
         [HttpPost]
         public IActionResult UpdateUsers(List<string> selectedUsers)
         {
@@ -536,7 +558,7 @@ namespace Trac_WorkReport.Controllers
                     usersInRoles.AddRange(users.Select(u => new SelectListItem
                     {
                         Value = u.Id,
-                        Text = u.EmployeeName
+                        Text = u.EmployeeName +"("+u.EmployeeID +")"
                     }));
                 }
             }

@@ -27,9 +27,14 @@ namespace WorkRport.DataAccess.Repository
             //throw new NotImplementedException();
         }
 
-        public void update(TimeSheet obj)
+        //public void update(TimeSheet obj)
+        //{
+        //    _db.timeSheets.Update(obj);   
+        //}
+
+        public void Update(TimeSheet timesheet)
         {
-            _db.timeSheets.Update(obj);   
+            _db.timeSheets.Update(timesheet);
         }
 
         public IEnumerable<TimeSheet> GetTimeSheetsByEmployeeId(string employeeId)
